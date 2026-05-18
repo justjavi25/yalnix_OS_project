@@ -27,7 +27,7 @@
  * ==>> the current process. 
  */
 int
-LoadProgram(char *name, char *args[], proc) 
+LoadProgram(char *name, char *args[], int proc) 
 
 {
   int fd;
