@@ -1,11 +1,6 @@
 /* Queue.c */
 #include "Queue.h"
 
-/*
- * TODO Checkpoint 2:
- * Implement all queue operations.
- * See pseudocode in Queue.h.
- */
 
 void Queue_init(Queue_t *q)
 {

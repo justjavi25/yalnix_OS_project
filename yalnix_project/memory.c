@@ -1,39 +1,38 @@
 /* memory.c */
 #include "memory.h"
 
-/*
- * TODO Checkpoint 2:
- * Implement all functions declared in memory.h.
- * See pseudocode in each function comment above.
- */
-
 void init_frame_table(unsigned int pmem_size)
 {
-    (void) pmem_size;
-    TracePrintf(1, "init_frame_table: stub\n");
+  //helper function used to initialize a frame table
+  // this is used to track what frames are free and which are used up 
+  // used in boot and it should be 
+  //  bit vector is made to keep track of these
 }
 
 int allocate_frame(void)
 {
-    TracePrintf(1, "allocate_frame: stub\n");
-    return 0;
+    //first we check if the frame is able to be allocated in bit vector
+    //should call a memory trap?
+    //if memory trap returned ok we return non error and change bit vector to reflect taht
+    //else error
 }
 
 void free_frame(int frame_num)
 {
-    (void) frame_num;
-    TracePrintf(1, "free_frame: stub\n");
+  //we check if frame is freeable to beign with
+  //if it is memory_trap
+  //if memory trap return ok we change bit vector to reflect this
+
 }
 
 void build_region0_page_table(void)
 {
-    TracePrintf(1, "build_region0_page_table: stub\n");
+  //setup region 0
 }
 
 struct pte *create_region1_pt(void)
 {
-    TracePrintf(1, "create_region1_pt: stub\n");
-    return NULL;
+    
 }
 
 void destroy_region1_pt(struct pte *pt)
