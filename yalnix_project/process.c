@@ -4,12 +4,6 @@
 pcb_t *current_process = NULL;
 pcb_t *idle_process    = NULL;
 
-/*
- * TODO Checkpoint 2 and beyond:
- * Implement all functions declared in process.h.
- * See pseudocode in each function comment.
- */
-
 void process_init(void)
 {
     TracePrintf(1, "process_init: stub\n");
@@ -17,8 +11,7 @@ void process_init(void)
 
 pcb_t *alloc_pcb(void)
 {
-    TracePrintf(1, "alloc_pcb: stub\n");
-    return NULL;
+
 }
 
 void free_pcb(pcb_t *proc)

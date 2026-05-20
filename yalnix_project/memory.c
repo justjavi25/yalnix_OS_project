@@ -24,17 +24,6 @@ void free_frame(int frame_num)
   //if memory trap return ok we change bit vector to reflect this
 
 }
-
-void build_region0_page_table(void)
-{
-  //setup region 0
-}
-
-struct pte *create_region1_pt(void)
-{
-    
-}
-
 void destroy_region1_pt(struct pte *pt)
 {
     (void) pt;
