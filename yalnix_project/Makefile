@@ -12,7 +12,7 @@
 K_SRC_DIR = .
 
 # What are the kernel c and include files? 
-K_SRCS = kernelstart.c memory.c process.c Queue.c syscalls.c trap.c
+K_SRCS = kernelstart.c memory.c process.c queue.c syscalls.c trap.c
 K_INCS = memory.h process.h syscalls.h trap.h
 
 # Where's your user source?

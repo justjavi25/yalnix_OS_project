@@ -71,14 +71,15 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
     //Region 1 page table length register.
     WriteRegister(REG_PTLR1, MAX_PT_LEN);
 
-    //flush all stale translations before enabling virtual memory.
-    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_ALL);
-
     //record in kernel bookkeeping that virtual memory is about to be active.
     vm_enabled = 1;
 
     //tell the hardware to begin translating addresses through the page tables.
     WriteRegister(REG_VM_ENABLE, 1);
+
+    //flush all stale translations before enabling virtual memory.
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_ALL);
+
 
     //copy idle's modified context into the hardware-provided return context.
     memcpy(uctxt, &idle->user_context, sizeof(UserContext));
