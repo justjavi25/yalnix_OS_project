@@ -88,8 +88,8 @@ pcb_t *CreateIdleProcess(UserContext *boot_context)
     //make the return-to-user-mode PC point at the idle loop in kernel text.
     idle->user_context.pc = DoIdle;
 
-    //put the idle user stack pointer at the top of Region 1.
-    idle->user_context.sp = (void *)VMEM_1_LIMIT;
+    //put the idle user stack pointer just below the top of Region 1.
+    idle->user_context.sp = (void *)(VMEM_1_LIMIT - sizeof(void *));
 
     //save the global idle process pointer for later scheduler code.
     idle_process = idle;
