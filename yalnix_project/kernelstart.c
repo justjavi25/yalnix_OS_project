@@ -49,15 +49,22 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 
     //create the idle PCB, including its Region 1 page table and user stack.
     pcb_t *idle = CreateIdleProcess(uctxt);
-
     //stop immediately if idle creation failed.
     if (idle == NULL) {
         //checkpoint 2 cannot finish without an idle process.
         helper_abort("KernelStart: CreateIdleProcess failed");
     }
 
-    //make idle the current process for the first return to user mode.
-    current_process = idle;
+    //create the init pcb along with its region 1 page table and user stack
+    pcb_t *init = CreateInitProcess(uctx, "init", cmd_args);  
+    //stop immediately if init creation failed.
+    if (init == NULL) {
+        //checkpoint 2 cannot finish without an idle process.
+        helper_abort("KernelStart: CreateIdleProcess failed");
+    }
+
+    //make init the current process for the first return to user mode.
+    current_process = init;
 
     // Region 0 page table base register.
     WriteRegister(REG_PTBR0, (unsigned int)region0_pt);
