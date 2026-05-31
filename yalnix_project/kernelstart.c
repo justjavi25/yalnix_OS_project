@@ -17,10 +17,6 @@
 //transition to user mode
 void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 {
-    //cmd_args is unused in checkpoint 2 because idle is hard-coded instead of loaded from a file.
-    (void)cmd_args;
-
-    //print a boot message so we can see KernelStart has begun.
     TracePrintf(0, "KernelStart: booting\n");
 
     //initialize the physical frame bitmap using the memory size provided by the hardware.
@@ -29,7 +25,7 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
     //initialize process globals before creating the idle process.
     InitProcessSystem();
 
-    //fill the trap vector with checkpoint-2 handlers.
+    //fill the trap vector with handlers.
     init_trap_vector();
 
     //tell the hardware where the trap vector table lives.
@@ -38,9 +34,7 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
     //build the Region 0 page table that maps the kernel address space.
     pte_t *region0_pt = BuildRegion0PageTable();
 
-    //stop immediately if Region 0 setup failed.
     if (region0_pt == NULL) {
-        //the kernel cannot enable virtual memory without a Region 0 page table.
         helper_abort("KernelStart: BuildRegion0PageTable failed");
     }
 
@@ -49,48 +43,48 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 
     //create the idle PCB, including its Region 1 page table and user stack.
     pcb_t *idle = CreateIdleProcess(uctxt);
-    //stop immediately if idle creation failed.
     if (idle == NULL) {
-        //checkpoint 2 cannot finish without an idle process.
         helper_abort("KernelStart: CreateIdleProcess failed");
     }
 
-    //create the init pcb along with its region 1 page table and user stack
-    pcb_t *init = CreateInitProcess(uctx, "init", cmd_args);  
-    //stop immediately if init creation failed.
-    if (init == NULL) {
-        //checkpoint 2 cannot finish without an idle process.
-        helper_abort("KernelStart: CreateIdleProcess failed");
-    }
-
-    //make init the current process for the first return to user mode.
-    current_process = init;
-
-    // Region 0 page table base register.
+    //point the hardware at the page tables and enable virtual memory.
+    //CreateInitProces calls LoadProgram which accesses Region 1 addresses,
+    //so VM must be on before we create init.
     WriteRegister(REG_PTBR0, (unsigned int)region0_pt);
-
-    //Region 0 page table length register.
     WriteRegister(REG_PTLR0, MAX_PT_LEN);
-
-    //idle's Region 1 page table base register.
     WriteRegister(REG_PTBR1, (unsigned int)idle->region1_pt);
-
-    //Region 1 page table length register.
     WriteRegister(REG_PTLR1, MAX_PT_LEN);
 
-    //record in kernel bookkeeping that virtual memory is about to be active.
     vm_enabled = 1;
-
-    //tell the hardware to begin translating addresses through the page tables.
     WriteRegister(REG_VM_ENABLE, 1);
-
-    //flush all stale translations before enabling virtual memory.
     WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_ALL);
 
+    //pick the init program name: cmd_args[0] if provided, else "init".
+    char *init_name = (cmd_args != NULL && cmd_args[0] != NULL) ? cmd_args[0] : "init";
 
-    //copy idle's modified context into the hardware-provided return context.
-    memcpy(uctxt, &idle->user_context, sizeof(UserContext));
+    //create the init PCB and load its program into Region 1.
+    //CreateInitProces internally switches PTBR1 to init's page table for LoadProgram.
+    pcb_t *init = CreateInitProces(uctxt, init_name, cmd_args);
+    if (init == NULL) {
+        helper_abort("KernelStart: CreateInitProces failed");
+    }
 
-    //print checkpoint-recommended message before returning into idle.
+    //clone idle's current kernel context and stack contents into init's PCB.
+    //After this call, init has a valid kernel_context it can be switched to.
+    if (KernelContextSwitch(KCCopy, (void *)init, NULL) != 0) {
+        helper_abort("KernelStart: KernelContextSwitch(KCCopy) failed");
+    }
+
+    //make init the first process to run in user mode.
+    current_process = init;
+
+    //switch the hardware to init's Region 1 so we return into init's userland.
+    WriteRegister(REG_PTBR1, (unsigned int)init->region1_pt);
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
+
+    //copy init's user context into the hardware-provided slot so the CPU
+    //returns to init's entry point when KernelStart returns.
+    memcpy(uctxt, &init->user_context, sizeof(UserContext));
+
     TracePrintf(0, "KernelStart: leaving KernelStart\n");
 }

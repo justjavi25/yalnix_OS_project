@@ -307,6 +307,11 @@ int SetKernelBrk(void *addr)
     return SUCCESS;
 }
 
+pte_t *GetRegion0PageTable(void)
+{
+    return region0_page_table;
+}
+
 void SyncKernelBrkBeforeVM(pte_t *region0_pt)
 {
     //remember the Region 0 page table so SetKernelBrk can use it later.

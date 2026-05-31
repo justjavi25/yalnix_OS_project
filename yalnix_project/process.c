@@ -117,16 +117,6 @@ pcb_t *CreateIdleProcess(UserContext *boot_context)
 
 
 
-
-
-
-
-
-
-
-
-
-
 /*
  *  Load a program into an existing address space.  The program comes from
  *  the Linux file named "name", and its arguments come from the array at
@@ -430,16 +420,55 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
 
 
 
-
-
-
-
-
-
 /*----------------------------------------------------------------------------------*/
 //Checkpoint 3
 
+/*
+ * KCCopy — KCSFunc_t called by KernelContextSwitch to clone the current
+ * kernel context and kernel stack contents into a brand-new process.
+ *
+ * After this returns, both the caller and new_pcb will resume from the
+ * same point (right after the KernelContextSwitch call in KernelStart).
+ * We return kc_in unchanged so the caller keeps running on its own context.
+ */
+KernelContext *KCCopy(KernelContext *kc_in, void *new_pcb_p, void *not_used)
+{
+    pcb_t *new_pcb = (pcb_t *)new_pcb_p;
 
+    //copy the current KernelContext into the new process's PCB.
+    new_pcb->kernel_context = *kc_in;
+
+    //scratch VPN is the page immediately below the kernel stack.
+    int scratch_vpn = (KERNEL_STACK_BASE >> PAGESHIFT) - 1;
+
+    //first VPN of the actual kernel stack.
+    int kstack_base_vpn = KERNEL_STACK_BASE >> PAGESHIFT;
+
+    //number of pages in the kernel stack.
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
+
+    pte_t *r0_pt = GetRegion0PageTable();
+
+    for (int i = 0; i < kstack_npages; i++) {
+        int dest_pfn = new_pcb->kernel_stack_pages[i];
+
+        //temporarily map dest frame into the scratch page so we can write to it.
+        MapPage(r0_pt, scratch_vpn, dest_pfn, PROT_READ | PROT_WRITE);
+        WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
+
+        //copy one kernel stack page from the current stack into the new frame.
+        void *src = (void *)((kstack_base_vpn + i) << PAGESHIFT);
+        void *dst = (void *)(scratch_vpn << PAGESHIFT);
+        memcpy(dst, src, PAGESIZE);
+    }
+
+    //unmap scratch page so it doesn't stay valid after this.
+    r0_pt[scratch_vpn].valid = 0;
+    WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
+
+    //return kc_in so the caller resumes on its own kernel context.
+    return kc_in;
+}
 
 
 
@@ -511,3 +540,12 @@ pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
 
 }
 
+
+KCCopy(){
+
+
+
+
+
+
+}

@@ -27,4 +27,7 @@ int MapPage(pte_t *pt, int vpn, int pfn, int prot);
 //maps any kernel heap growth that happened before VM was enabled.
 void SyncKernelBrkBeforeVM(pte_t *region0_pt);
 
+//returns a pointer to the Region 0 page table (needed by KCCopy).
+pte_t *GetRegion0PageTable(void);
+
 #endif
