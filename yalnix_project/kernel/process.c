@@ -28,6 +28,8 @@ void InitProcessSystem(void)
     current_process = NULL;
     //there is no idle process until CreateIdleProcess builds it.
     idle_process = NULL;
+    //there is no init process until checkpoint 3 creates it.
+    init_process = NULL;
 }
 
 //the checkpoint-2 idle function that runs after KernelStart returns to user mode.
@@ -148,8 +150,11 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
   int stack_npg;
   long segment_size;
   char *argbuf;
+  int heap_top_page;
 
-  current_process = proc;
+  if (name == NULL || args == NULL || proc == NULL || proc->region1_pt == NULL) {
+    return ERROR;
+  }
 
   /*
    * Open the executable file 
@@ -298,9 +303,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
    for(i = 0; i < li.t_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, text_pg1 + i, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, text_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
     }
 
   /*
@@ -311,9 +323,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
   for(i = 0; i < data_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, data_pg1 + i, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, data_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
     }
 
   /* 
@@ -324,9 +343,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
   for(i = 0; i < stack_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, MAX_PT_LEN - i - 1, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, MAX_PT_LEN - i - 1, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
   }
 
   /*
@@ -394,6 +420,10 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    * ==>> proc->uc.pc = (caddr_t) li.entry;
    */
   proc->user_context.pc = (void*)li.entry;
+  heap_top_page = data_pg1 + data_npg;
+  proc->brk_page = heap_top_page;
+  proc->min_brk_page = heap_top_page;
+  proc->stack_base_page = MAX_PT_LEN - stack_npg;
   /*
    * Now, finally, build the argument list on the new stack.
    */
@@ -470,10 +500,38 @@ KernelContext *KCCopy(KernelContext *kc_in, void *new_pcb_p, void *not_used)
     return kc_in;
 }
 
+KernelContext *KCSwitch(KernelContext *kc_in, void *old_pcb_p, void *new_pcb_p)
+{
+    pcb_t *old_pcb = (pcb_t *)old_pcb_p;
+    pcb_t *new_pcb = (pcb_t *)new_pcb_p;
+    int kstack_base_vpn = KERNEL_STACK_BASE >> PAGESHIFT;
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
+    pte_t *r0_pt = GetRegion0PageTable();
+
+    if (old_pcb == NULL || new_pcb == NULL || r0_pt == NULL) {
+        helper_abort("KCSwitch: invalid process switch");
+    }
+
+    old_pcb->kernel_context = *kc_in;
+
+    for (int i = 0; i < kstack_npages; i++) {
+        if (MapPage(r0_pt, kstack_base_vpn + i,
+                    new_pcb->kernel_stack_pages[i],
+                    PROT_READ | PROT_WRITE) == ERROR) {
+            helper_abort("KCSwitch: kernel stack remap failed");
+        }
+    }
+
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_0);
+
+    return &new_pcb->kernel_context;
+}
 
 
-//now that we have our idle process, we then clone a new init proces after idling
-pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
+
+//now that we have our idle process, create init and load its user program.
+pcb_t *CreateInitProcess(UserContext *init_context, char *name, char **args){
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
 
     //first we set up our pcb for init
     pcb_t *init = malloc(sizeof(pcb_t));
@@ -496,26 +554,13 @@ pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
         helper_abort("CreateInitProcess: CreateRegion1PageTable failed");
     }
 
-    //allocate one physical frame for inits user stack.
-    int stack_pfn = AllocFrame();
-    //stop if physical memory is exhausted before init can run.
-    if (stack_pfn == ERROR) {
-        //without a stack frame, returning into idle would trap immediately.
-        helper_abort("CreateInitProcess: init stack allocation failed");
+    //Allocate physical frames for init's private kernel stack.
+    for (int i = 0; i < kstack_npages; i++) {
+        init->kernel_stack_pages[i] = AllocFrame();
+        if (init->kernel_stack_pages[i] == ERROR) {
+            helper_abort("CreateInitProcess: kernel stack allocation failed");
+        }
     }
-    //map the top Region 1 virtual page as inits's user stack and check to make sure it got mapped correctly
-    //without throwing an error
-    if (MapPage(init->region1_pt, MAX_PT_LEN - 1, stack_pfn,
-                PROT_READ | PROT_WRITE) == ERROR) {
-        //give the frame back because the page-table mapping failed.
-        FreeFrame(stack_pfn);
-        //stop because init cannot run without a mapped stack.
-        helper_abort("CreateIdleProcess: init stack mapping failed");
-    }
-
-    //since were loading a new program we allocate new frames to each new stack page
-    init->kernel_stack_pages[0] = AllocFrame();
-    init->kernel_stack_pages[1] = AllocFrame();
 
     //ask the Yalnix helper code for a pid tied to this Region 1 page table.(pg43 of manual)
     init->pid = helper_new_pid(init->region1_pt);
@@ -535,17 +580,7 @@ pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
     //save the global init process pointer for later scheduler code.
     init_process = init;
 
-    //return the completed idle PCB to KernelStart.
+    //return the completed init PCB to KernelStart.
     return init;
-
-}
-
-
-KCCopy(){
-
-
-
-
-
 
 }

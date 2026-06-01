@@ -9,7 +9,7 @@
 
 
 # Where's your kernel source?
-K_SRC_DIR = .
+K_SRC_DIR = kernel
 
 # What are the kernel c and include files? 
 K_SRCS = kernelstart.c memory.c process.c queue.c syscalls.c trap.c
@@ -19,7 +19,7 @@ K_INCS = memory.h process.h syscalls.h trap.h
 U_SRC_DIR = .
 
 # What are the user c and include files?
-U_SRCS =
+U_SRCS = init.c test/cp3_getpid.c test/cp3_delay.c test/cp3_brk.c
 U_INCS =  
 
 
@@ -52,7 +52,7 @@ YALNIX_OUTPUT = yalnix
 #Use the gcc compiler for compiling and linking
 CC = gcc
 
-DDIR58 = $(YALNIX_FRAMEWORK)
+DDIR58 = $(if $(YALNIX_FRAMEWORK),$(YALNIX_FRAMEWORK),.)
 LIBDIR = $(DDIR58)/lib
 INCDIR = $(DDIR58)/include
 ETCDIR = $(DDIR58)/etc
@@ -83,7 +83,7 @@ LINK_USER = $(LINK.c) $(USER_CFLAGS) $(USER_LINK_FLAGS)
 
 USER_LIBS = $(LIBDIR)/libyuser.a
 ASFLAGS = -D__ASM__
-CPPFLAGS=  -D_FILE_OFFSET_BITS=64 -m32 -fno-builtin -I. -I$(INCDIR) -g -DLINUX -fno-stack-protector
+CPPFLAGS=  -D_FILE_OFFSET_BITS=64 -m32 -fno-builtin -I. -I$(K_SRC_DIR) -I$(INCDIR) -g -DLINUX -fno-stack-protector
 
 
 ##########################
@@ -107,7 +107,7 @@ count:
 	wc $(KERNEL_SRCS) $(USER_SRCS)
 
 list:
-	ls -l *.c *.h
+	ls -l *.c *.h $(K_SRC_DIR)/*.c $(K_SRC_DIR)/*.h
 
 kill:
 	killall yalnixtty yalnixnet yalnix

@@ -2,7 +2,9 @@
 #include "trap.h"
 #include "process.h"
 #include "syscalls.h"
+#include <hardware.h>
 #include <ykernel.h>
+#include <ylib.h>
 
 /*
 //CHECKPOINT 2:
@@ -12,6 +14,41 @@ Create the flobal trap vector table - with entries equal to TRAP_VECTOR_SIZE as 
 HW uses this table to decide which handler to call for each trap number
 */
 void (*trap_vector[TRAP_VECTOR_SIZE])(UserContext *);
+
+static int clock_ticks = 0;
+
+static void WakeDelayedProcesses(void)
+{
+    if (init_process != NULL &&
+        init_process->delayed &&
+        clock_ticks >= init_process->wake_tick) {
+        init_process->delayed = 0;
+    }
+}
+
+static pcb_t *PickNextProcess(void)
+{
+    if (current_process == NULL || init_process == NULL || idle_process == NULL) {
+        return current_process;
+    }
+
+    if (init_process->delayed) {
+        return idle_process;
+    }
+
+    if (current_process == init_process) {
+        return idle_process;
+    }
+
+    return init_process;
+}
+
+static void RestoreCurrentProcess(UserContext *uctxt)
+{
+    WriteRegister(REG_PTBR1, (unsigned int)current_process->region1_pt);
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
+    memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
+}
 
 
 /*Should create and register the interrupts/trap handler table (Section 2.5, table 2.2)
@@ -43,13 +80,39 @@ For checkpoint 2: Only need to identify that a syscall happened.
 */
 void HandleTrapKernel(UserContext *uctxt)
 {
-    //CHECKPOINT 2:
+    int blocked;
+    pcb_t *old_process;
+    pcb_t *next_process;
 
-    //print syscall number
     TracePrintf(0, "kernel trap syscall code=0x%x\n", uctxt->code);
-    //return value for syscall put in regs[0] as specified in section 3.2
-    //We haven't implemented syscalls yet, so just return error.
-    uctxt->regs[0] = ERROR;
+
+    if (current_process == NULL) {
+        uctxt->regs[0] = ERROR;
+        return;
+    }
+
+    blocked = DispatchSyscall(uctxt, clock_ticks);
+    memcpy(&current_process->user_context, uctxt, sizeof(UserContext));
+
+    if (!blocked) {
+        return;
+    }
+
+    old_process = current_process;
+    next_process = PickNextProcess();
+
+    if (next_process == NULL || next_process == old_process) {
+        return;
+    }
+
+    current_process = next_process;
+    if (KernelContextSwitch(KCSwitch,
+                            (void *)old_process,
+                            (void *)next_process) != 0) {
+        helper_abort("HandleTrapKernel: KernelContextSwitch failed");
+    }
+
+    RestoreCurrentProcess(uctxt);
 }
 
 /*
@@ -57,12 +120,33 @@ Handle timer interrupts. For checkpoint 2: just trace and return
 */
 void HandleTrapClock(UserContext *uctxt)
 {
+    pcb_t *old_process;
+    pcb_t *next_process;
 
-  //CHECKPOINT 2:
+    clock_ticks++;
+    WakeDelayedProcesses();
 
-  //Log that a clock interrupt occured, does not need scheduling yet
-  TracePrintf(1, "clock trap\n");
+    TracePrintf(1, "clock trap\n");
 
+    if (current_process == NULL) {
+        return;
+    }
+
+    memcpy(&current_process->user_context, uctxt, sizeof(UserContext));
+
+    old_process = current_process;
+    next_process = PickNextProcess();
+
+    if (next_process != NULL && next_process != old_process) {
+        current_process = next_process;
+        if (KernelContextSwitch(KCSwitch,
+                                (void *)old_process,
+                                (void *)next_process) != 0) {
+            helper_abort("HandleTrapClock: KernelContextSwitch failed");
+        }
+    }
+
+    RestoreCurrentProcess(uctxt);
 }
 
 /*

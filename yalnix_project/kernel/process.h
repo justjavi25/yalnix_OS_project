@@ -19,6 +19,21 @@ typedef struct pcb {
 
     //physical pages currently used for this process's kernel stack.
     int kernel_stack_pages[KERNEL_STACK_MAXSIZE / PAGESIZE];
+
+    //lowest Region 1 page not used by the loaded program's data/heap.
+    int brk_page;
+
+    //lowest legal heap break page for this process.
+    int min_brk_page;
+
+    //first Region 1 page currently mapped for the user stack.
+    int stack_base_page;
+
+    //nonzero when the process is blocked in Delay.
+    int delayed;
+
+    //clock tick on or after which a delayed process can run again.
+    int wake_tick;
 } pcb_t;
 
 //the process currently running or about to return to user mode.
@@ -40,12 +55,15 @@ pcb_t *CreateIdleProcess(UserContext *boot_context);
 void DoIdle(void);
 
 //creates the init process PCB and loads its program into Region 1.
-pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args);
+pcb_t *CreateInitProcess(UserContext *init_context, char *name, char **args);
 
 //loads a Linux executable into a process's Region 1 address space.
 int LoadProgram(char *name, char *args[], pcb_t *proc);
 
 //KCSFunc_t for cloning the current kernel context+stack into a new process.
 KernelContext *KCCopy(KernelContext *kc_in, void *new_pcb_p, void *not_used);
+
+//KCSFunc_t for switching from one existing process to another.
+KernelContext *KCSwitch(KernelContext *kc_in, void *old_pcb_p, void *new_pcb_p);
 
 #endif
