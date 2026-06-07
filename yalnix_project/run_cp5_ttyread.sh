@@ -10,7 +10,8 @@ abcdefghi
 second
 INPUT
 
-timeout 8 ./yalnix -I0 cp5_tty_read_input.txt test/cp5_tty_read || true
+echo "Running: timeout 8 ./yalnix -I0cp5_tty_read_input.txt test/cp5_tty_read"
+timeout 8 ./yalnix -I0cp5_tty_read_input.txt test/cp5_tty_read || true
 
 echo "== TRACE summary =="
 grep -E "cp5_tty_read|TtyRead|TRAP_TTY|memory trap|aborting|ERROR|FAIL|PASS" TRACE || true
