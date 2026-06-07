@@ -5,7 +5,7 @@ make clean
 make
 rm -f TRACE TTYLOG TTYLOG.0 TTYLOG.1 TTYLOG.2 TTYLOG.3
 
-timeout 8 ./yalnix -x test/cp5_tty_write || true
+timeout 8 ./yalnix test/cp5_tty_write || true
 
 echo "== TRACE summary =="
 grep -E "cp5_tty_write|TtyWrite|TRAP_TTY|memory trap|aborting|ERROR|FAIL|PASS" TRACE || true
