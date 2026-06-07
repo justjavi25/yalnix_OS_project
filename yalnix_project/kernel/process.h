@@ -72,6 +72,14 @@ typedef struct pcb {
     char *tty_write_buf;
     int tty_write_len;
     int tty_write_offset;
+
+    //nonzero if blocked on terminal input.
+    int tty_read_blocked;
+
+    //terminal input bookkeeping for TtyRead.
+    int tty_read_id;
+    void *tty_read_buf;
+    int tty_read_len;
 } pcb_t;
 
 //the process currently running or about to return to user mode.

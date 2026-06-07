@@ -9,6 +9,12 @@ void InitTtySystem(void);
 //kernel-side implementation of the TtyWrite syscall.
 int KernelTtyWrite(int tty_id, void *buf, int len, int *blocked);
 
+//kernel-side implementation of the TtyRead syscall.
+int KernelTtyRead(int tty_id, void *buf, int len, int *blocked);
+
+//handle a TRAP_TTY_RECEIVE interrupt.
+void HandleTtyReceive(int tty_id);
+
 //handle a TRAP_TTY_TRANSMIT interrupt.
 void HandleTtyTransmit(int tty_id);
 

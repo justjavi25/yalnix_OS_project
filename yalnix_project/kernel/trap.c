@@ -26,7 +26,8 @@ static void WakeDelayedProcesses(void)
     while (node != NULL) {
         pcb_t *proc = node->process;
         if (proc != NULL && proc->delayed && proc->wake_tick <= clock_ticks &&
-            !proc->is_zombie && !proc->wait_blocked) {
+            !proc->is_zombie && !proc->wait_blocked &&
+            !proc->tty_read_blocked && !proc->tty_write_blocked) {
             proc->delayed = 0;
             if (proc != current_process &&
                 !IsProcessInQueue(&ready_queue, proc)) {
@@ -48,7 +49,8 @@ static int IsRunnable(pcb_t *proc)
     }
 
     return !proc->delayed && !proc->wait_blocked &&
-           !proc->tty_write_blocked && !proc->is_zombie;
+           !proc->tty_read_blocked && !proc->tty_write_blocked &&
+           !proc->is_zombie;
 }
 
 static pcb_t *DequeueRunnableProcess(void)
@@ -289,7 +291,7 @@ void HandleTrapMath(UserContext *uctxt)
 
 void HandleTrapTtyReceive(UserContext *uctxt)
 {
-  HandleTrapUnhandled(uctxt);
+  HandleTtyReceive(uctxt->code);
 }
 
 void HandleTrapTtyTransmit(UserContext *uctxt)

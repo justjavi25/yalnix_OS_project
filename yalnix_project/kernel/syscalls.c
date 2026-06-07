@@ -402,6 +402,13 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
         uctxt->regs[0] = KernelWaitDispatch((int *)uctxt->regs[0], &blocked);
         break;
 
+    case YALNIX_TTY_READ:
+        uctxt->regs[0] = KernelTtyRead((int)uctxt->regs[0],
+                                        (void *)uctxt->regs[1],
+                                        (int)uctxt->regs[2],
+                                        &blocked);
+        break;
+
     case YALNIX_TTY_WRITE:
         uctxt->regs[0] = KernelTtyWrite((int)uctxt->regs[0],
                                          (void *)uctxt->regs[1],
