@@ -1,6 +1,7 @@
 #include "syscalls.h"
 #include "memory.h"
 #include "process.h"
+#include "tty.h"
 #include <hardware.h>
 #include <yalnix.h>
 #include <ykernel.h>
@@ -399,6 +400,13 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
     case YALNIX_WAIT:
         //wait syscall: parent waits for child to exit.
         uctxt->regs[0] = KernelWaitDispatch((int *)uctxt->regs[0], &blocked);
+        break;
+
+    case YALNIX_TTY_WRITE:
+        uctxt->regs[0] = KernelTtyWrite((int)uctxt->regs[0],
+                                         (void *)uctxt->regs[1],
+                                         (int)uctxt->regs[2],
+                                         &blocked);
         break;
 
     default:

@@ -63,6 +63,15 @@ typedef struct pcb {
 
     //child side of Fork should force the syscall return value to 0.
     int fork_return_zero;
+
+    //nonzero if blocked on terminal output.
+    int tty_write_blocked;
+
+    //terminal output bookkeeping for TtyWrite.
+    int tty_id;
+    char *tty_write_buf;
+    int tty_write_len;
+    int tty_write_offset;
 } pcb_t;
 
 //the process currently running or about to return to user mode.

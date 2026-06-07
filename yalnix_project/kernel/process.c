@@ -762,6 +762,11 @@ void FreeProcess(pcb_t *proc)
         free(proc->region1_pt);
     }
 
+    if (proc->tty_write_buf != NULL) {
+        free(proc->tty_write_buf);
+        proc->tty_write_buf = NULL;
+    }
+
     //free the kernel stack frames.
     int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
     for (int i = 0; i < kstack_npages; i++) {

@@ -3,6 +3,7 @@
 #include "process.h"
 #include "syscalls.h"
 #include "queue.h"
+#include "tty.h"
 #include <hardware.h>
 #include <ykernel.h>
 #include <ylib.h>
@@ -46,7 +47,8 @@ static int IsRunnable(pcb_t *proc)
         return 1;
     }
 
-    return !proc->delayed && !proc->wait_blocked && !proc->is_zombie;
+    return !proc->delayed && !proc->wait_blocked &&
+           !proc->tty_write_blocked && !proc->is_zombie;
 }
 
 static pcb_t *DequeueRunnableProcess(void)
@@ -292,8 +294,7 @@ void HandleTrapTtyReceive(UserContext *uctxt)
 
 void HandleTrapTtyTransmit(UserContext *uctxt)
 {
-  HandleTrapUnhandled(uctxt);
-
+  HandleTtyTransmit(uctxt->code);
 }
 
 void HandleTrapDisk(UserContext *uctxt)
