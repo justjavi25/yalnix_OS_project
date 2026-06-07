@@ -165,6 +165,11 @@ void HandleTrapKernel(UserContext *uctxt)
 
     blocked = DispatchSyscall(uctxt, clock_ticks);
     memcpy(&current_process->user_context, uctxt, sizeof(UserContext));
+    if (current_process->fork_return_zero) {
+        current_process->user_context.regs[0] = 0;
+        memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
+        current_process->fork_return_zero = 0;
+    }
     if (!current_process->is_zombie) {
         current_process->has_run = 1;
     }
