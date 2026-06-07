@@ -6,6 +6,7 @@
 #include "process.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 #include <ykernel.h>
 #include <load_info.h>
 
@@ -16,6 +17,8 @@ pcb_t *current_process = NULL;
 pcb_t *idle_process = NULL;
 //the special init process
 pcb_t *init_process = NULL;
+//the ready queue of processes available to run.
+process_queue_t ready_queue;
 
 
 
@@ -28,6 +31,10 @@ void InitProcessSystem(void)
     current_process = NULL;
     //there is no idle process until CreateIdleProcess builds it.
     idle_process = NULL;
+    //there is no init process until checkpoint 3 creates it.
+    init_process = NULL;
+    //initialize the ready queue to be empty.
+    InitProcessQueue(&ready_queue);
 }
 
 //the checkpoint-2 idle function that runs after KernelStart returns to user mode.
@@ -90,6 +97,7 @@ pcb_t *CreateIdleProcess(UserContext *boot_context)
 
     //ask the Yalnix helper code for a pid tied to this Region 1 page table.
     idle->pid = helper_new_pid(idle->region1_pt);
+    idle->has_run = 1;  //idle is already running at boot time.
 
     //copy the boot UserContext so we preserve the framework-provided starting state.
     memcpy(&idle->user_context, boot_context, sizeof(UserContext));
@@ -97,13 +105,8 @@ pcb_t *CreateIdleProcess(UserContext *boot_context)
     //make the return-to-user-mode PC point at the idle loop in kernel text.
     idle->user_context.pc = DoIdle;
 
-<<<<<<< HEAD
     //put the idle user stack pointer at the top of Region 1.
     idle->user_context.sp = (void *)VMEM_1_LIMIT - sizeof(void*);
-=======
-    //put the idle user stack pointer just below the top of Region 1.
-    idle->user_context.sp = (void *)(VMEM_1_LIMIT - sizeof(void *));
->>>>>>> c53601ad509b09c75d4440619ebd312af9c5e6e9
 
     //save the global idle process pointer for later scheduler code.
     idle_process = idle;
@@ -153,14 +156,17 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
   int stack_npg;
   long segment_size;
   char *argbuf;
+  int heap_top_page;
 
-  current_process = proc;
+  if (name == NULL || args == NULL || proc == NULL || proc->region1_pt == NULL) {
+    return ERROR;
+  }
 
   /*
    * Open the executable file 
    */
   if ((fd = open(name, O_RDONLY)) < 0) {
-    TracePrintf(0, "LoadProgram: can't open file '%s'\n", name);
+    TracePrintf(0, "LoadProgram: can't open file '%s' (errno=%d)\n", name, errno);
     return ERROR;
   }
 
@@ -303,9 +309,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
    for(i = 0; i < li.t_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, text_pg1 + i, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, text_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
     }
 
   /*
@@ -316,9 +329,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
   for(i = 0; i < data_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, data_pg1 + i, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, data_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
     }
 
   /* 
@@ -329,9 +349,16 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    */
   for(i = 0; i < stack_npg; i++){
       int pfn = AllocFrame();
-      if(pfn == ERROR) return ERROR;
+      if(pfn == ERROR) {
+        close(fd);
+        return ERROR;
+      }
 
-      MapPage(proc->region1_pt, MAX_PT_LEN - i - 1, pfn, PROT_READ | PROT_WRITE);
+      if (MapPage(proc->region1_pt, MAX_PT_LEN - i - 1, pfn, PROT_READ | PROT_WRITE) == ERROR) {
+        FreeFrame(pfn);
+        close(fd);
+        return ERROR;
+      }
   }
 
   /*
@@ -399,6 +426,10 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
    * ==>> proc->uc.pc = (caddr_t) li.entry;
    */
   proc->user_context.pc = (void*)li.entry;
+  heap_top_page = data_pg1 + data_npg;
+  proc->brk_page = heap_top_page;
+  proc->min_brk_page = heap_top_page;
+  proc->stack_base_page = MAX_PT_LEN - stack_npg;
   /*
    * Now, finally, build the argument list on the new stack.
    */
@@ -475,10 +506,38 @@ KernelContext *KCCopy(KernelContext *kc_in, void *new_pcb_p, void *not_used)
     return kc_in;
 }
 
+KernelContext *KCSwitch(KernelContext *kc_in, void *old_pcb_p, void *new_pcb_p)
+{
+    pcb_t *old_pcb = (pcb_t *)old_pcb_p;
+    pcb_t *new_pcb = (pcb_t *)new_pcb_p;
+    int kstack_base_vpn = KERNEL_STACK_BASE >> PAGESHIFT;
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
+    pte_t *r0_pt = GetRegion0PageTable();
+
+    if (old_pcb == NULL || new_pcb == NULL || r0_pt == NULL) {
+        helper_abort("KCSwitch: invalid process switch");
+    }
+
+    old_pcb->kernel_context = *kc_in;
+
+    for (int i = 0; i < kstack_npages; i++) {
+        if (MapPage(r0_pt, kstack_base_vpn + i,
+                    new_pcb->kernel_stack_pages[i],
+                    PROT_READ | PROT_WRITE) == ERROR) {
+            helper_abort("KCSwitch: kernel stack remap failed");
+        }
+    }
+
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_0);
+
+    return &new_pcb->kernel_context;
+}
 
 
-//now that we have our idle process, we then clone a new init proces after idling
-pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
+
+//now that we have our idle process, create init and load its user program.
+pcb_t *CreateInitProcess(UserContext *init_context, char *name, char **args){
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
 
     //first we set up our pcb for init
     pcb_t *init = malloc(sizeof(pcb_t));
@@ -501,29 +560,17 @@ pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
         helper_abort("CreateInitProcess: CreateRegion1PageTable failed");
     }
 
-    //allocate one physical frame for inits user stack.
-    int stack_pfn = AllocFrame();
-    //stop if physical memory is exhausted before init can run.
-    if (stack_pfn == ERROR) {
-        //without a stack frame, returning into idle would trap immediately.
-        helper_abort("CreateInitProcess: init stack allocation failed");
+    //Allocate physical frames for init's private kernel stack.
+    for (int i = 0; i < kstack_npages; i++) {
+        init->kernel_stack_pages[i] = AllocFrame();
+        if (init->kernel_stack_pages[i] == ERROR) {
+            helper_abort("CreateInitProcess: kernel stack allocation failed");
+        }
     }
-    //map the top Region 1 virtual page as inits's user stack and check to make sure it got mapped correctly
-    //without throwing an error
-    if (MapPage(init->region1_pt, MAX_PT_LEN - 1, stack_pfn,
-                PROT_READ | PROT_WRITE) == ERROR) {
-        //give the frame back because the page-table mapping failed.
-        FreeFrame(stack_pfn);
-        //stop because init cannot run without a mapped stack.
-        helper_abort("CreateIdleProcess: init stack mapping failed");
-    }
-
-    //since were loading a new program we allocate new frames to each new stack page
-    init->kernel_stack_pages[0] = AllocFrame();
-    init->kernel_stack_pages[1] = AllocFrame();
 
     //ask the Yalnix helper code for a pid tied to this Region 1 page table.(pg43 of manual)
     init->pid = helper_new_pid(init->region1_pt);
+    init->has_run = 1;  //init will start running right after this.
 
     //copy the init UserContext to the provided init_context so we preserve the starting state.
     memcpy(&init->user_context, init_context, sizeof(UserContext));
@@ -540,17 +587,176 @@ pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args){
     //save the global init process pointer for later scheduler code.
     init_process = init;
 
-    //return the completed idle PCB to KernelStart.
+    //add init to the ready queue so it can be scheduled.
+    EnqueueProcess(&ready_queue, init);
+
+    //return the completed init PCB to KernelStart.
     return init;
 
 }
 
 
-KCCopy(){
+/*----------------------------------------------------------------------------------*/
+//CHECKPOINT 4: Process Cloning and Freeing
 
 
+//clone the current process to create a child process for Fork.
+pcb_t *CloneProcess(pcb_t *parent_proc)
+{
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
+    int scratch_vpn = (KERNEL_STACK_BASE >> PAGESHIFT) - 1;
+    int scratch_vpn2 = (KERNEL_STACK_BASE >> PAGESHIFT) - 2;
+    pte_t *r0_pt = GetRegion0PageTable();
+
+    TracePrintf(0, "CloneProcess: START cloning parent PID %d at %p\n", parent_proc->pid, parent_proc);
+
+    //allocate memory for the new child PCB.
+    pcb_t *child = malloc(sizeof(pcb_t));
+
+    TracePrintf(0, "CloneProcess: malloc returned %p\n", child);
+
+    if (child == NULL) {
+        //not enough memory to create child process.
+        return NULL;
+    }
+
+    //safety check: ensure malloc didn't return parent's PCB!
+    if (child == parent_proc) {
+        //malloc is broken, it returned the parent's PCB!
+        TracePrintf(0, "CloneProcess: ERROR! malloc returned parent PCB %p, heap corruption detected!\n", parent_proc);
+        //don't free since we didn't really allocate anything different
+        return NULL;
+    }
+
+    //initialize all fields to zero to ensure valid state.
+    memset(child, 0, sizeof(pcb_t));
+
+    //allocate a new Region 1 page table for the child.
+    child->region1_pt = CreateRegion1PageTable();
+
+    if (child->region1_pt == NULL) {
+        //could not allocate Region 1 page table for child.
+        free(child);
+        return NULL;
+    }
+
+    //allocate physical frames for the child's kernel stack.
+    for (int i = 0; i < kstack_npages; i++) {
+        child->kernel_stack_pages[i] = AllocFrame();
+
+        if (child->kernel_stack_pages[i] == ERROR) {
+            //could not allocate a kernel stack frame for child.
+            for (int j = 0; j < i; j++) {
+                FreeFrame(child->kernel_stack_pages[j]);
+            }
+            free(child->region1_pt);
+            free(child);
+            return NULL;
+        }
+    }
+
+    //get a new process ID from the helper.
+    child->pid = helper_new_pid(child->region1_pt);
+
+    //save the parent pointer for later Wait syscall.
+    child->parent = parent_proc;
+
+    //copy the parent's saved user context as the starting point.
+    memcpy(&child->user_context, &parent_proc->user_context, sizeof(UserContext));
+
+    //debug: verify the child's user context was copied correctly.
+    TracePrintf(0, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
+                parent_proc->user_context.pc, child->user_context.pc);
+
+    //TEMPORARY FIX: skip Region 1 page copy to avoid heap corruption in scratch page mapping.
+    //TODO: implement copy-on-write instead of deep copy.
+    //
+    //for now, child shares parent's Region 1 page table.
+    child->region1_pt = parent_proc->region1_pt;
+    //
+    //copy each page from parent's Region 1 to child's Region 1.
+    // for (int vpn = 0; vpn < MAX_PT_LEN; vpn++) {
+    //     //check if the parent has this page mapped.
+    //     if (parent_proc->region1_pt[vpn].valid) {
+    //         //allocate a new frame for the child's copy of this page.
+    //         int new_pfn = AllocFrame();
+    //
+    //         if (new_pfn == ERROR) {
+    //             //could not allocate frame, clean up and return NULL.
+    //             FreeProcess(child);
+    //             return NULL;
+    //         }
+    //
+    //         //temporarily map parent's page to scratch_vpn2 for reading.
+    //         int parent_pfn = parent_proc->region1_pt[vpn].pfn;
+    //         MapPage(r0_pt, scratch_vpn2, parent_pfn, PROT_READ);
+    //         WriteRegister(REG_TLB_FLUSH, scratch_vpn2 << PAGESHIFT);
+    //
+    //         //temporarily map child's new frame to scratch_vpn for writing.
+    //         MapPage(r0_pt, scratch_vpn, new_pfn, PROT_READ | PROT_WRITE);
+    //         WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
+    //
+    //         //copy the page contents from parent to child.
+    //         void *src = (void *)(scratch_vpn2 << PAGESHIFT);
+    //         void *dst = (void *)(scratch_vpn << PAGESHIFT);
+    //         memcpy(dst, src, PAGESIZE);
+    //
+    //         //set up the child's page table entry with the same protection as parent.
+    //         child->region1_pt[vpn] = parent_proc->region1_pt[vpn];
+    //         child->region1_pt[vpn].pfn = new_pfn;
+    //     }
+    // }
+    //
+    // //unmap the scratch pages.
+    // r0_pt[scratch_vpn].valid = 0;
+    // r0_pt[scratch_vpn2].valid = 0;
+    // WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_0);
+
+    //copy the heap and stack boundary information from parent.
+    child->brk_page = parent_proc->brk_page;
+    child->min_brk_page = parent_proc->min_brk_page;
+    child->stack_base_page = parent_proc->stack_base_page;
+
+    //child is ready to run, not blocked.
+    child->delayed = 0;
+
+    //return the newly created child process.
+    return child;
+}
 
 
+//free all resources associated with a process.
+void FreeProcess(pcb_t *proc)
+{
+    if (proc == NULL) {
+        //nothing to free.
+        return;
+    }
 
+    //free all valid pages in the Region 1 page table.
+    if (proc->region1_pt != NULL) {
+        for (int i = 0; i < MAX_PT_LEN; i++) {
+            if (proc->region1_pt[i].valid) {
+                //free the physical frame backing this page.
+                FreeFrame(proc->region1_pt[i].pfn);
+            }
+        }
 
+        //free the Region 1 page table itself.
+        free(proc->region1_pt);
+    }
+
+    //free the kernel stack frames.
+    int kstack_npages = KERNEL_STACK_MAXSIZE / PAGESIZE;
+    for (int i = 0; i < kstack_npages; i++) {
+        if (proc->kernel_stack_pages[i] != 0) {
+            FreeFrame(proc->kernel_stack_pages[i]);
+        }
+    }
+
+    //tell the helper that this PID is no longer in use.
+    helper_retire_pid(proc->pid);
+
+    //free the PCB itself.
+    free(proc);
 }

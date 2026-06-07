@@ -46,58 +46,51 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
     if (idle == NULL) {
         helper_abort("KernelStart: CreateIdleProcess failed");
     }
+    current_process = idle;
 
     //point the hardware at the page tables and enable virtual memory.
-    //CreateInitProces calls LoadProgram which accesses Region 1 addresses,
+    //CreateInitProcess calls LoadProgram which accesses Region 1 addresses,
     //so VM must be on before we create init.
     WriteRegister(REG_PTBR0, (unsigned int)region0_pt);
     WriteRegister(REG_PTLR0, MAX_PT_LEN);
     WriteRegister(REG_PTBR1, (unsigned int)idle->region1_pt);
     WriteRegister(REG_PTLR1, MAX_PT_LEN);
 
-<<<<<<< HEAD
     vm_enabled = 1;
     WriteRegister(REG_VM_ENABLE, 1);
     WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_ALL);
 
     //pick the init program name: cmd_args[0] if provided, else "init".
-    char *init_name = (cmd_args != NULL && cmd_args[0] != NULL) ? cmd_args[0] : "init";
-=======
-    //record in kernel bookkeeping that virtual memory is about to be active.
-    vm_enabled = 1;
->>>>>>> c53601ad509b09c75d4440619ebd312af9c5e6e9
+    char *default_args[] = { "init", NULL };
+    char **init_args = (cmd_args != NULL && cmd_args[0] != NULL) ? cmd_args : default_args;
+    char *init_name = init_args[0];
 
     //create the init PCB and load its program into Region 1.
-    //CreateInitProces internally switches PTBR1 to init's page table for LoadProgram.
-    pcb_t *init = CreateInitProces(uctxt, init_name, cmd_args);
+    //CreateInitProcess internally switches PTBR1 to init's page table for LoadProgram.
+    pcb_t *init = CreateInitProcess(uctxt, init_name, init_args);
     if (init == NULL) {
-        helper_abort("KernelStart: CreateInitProces failed");
+        helper_abort("KernelStart: CreateInitProcess failed");
     }
 
-<<<<<<< HEAD
     //clone idle's current kernel context and stack contents into init's PCB.
     //After this call, init has a valid kernel_context it can be switched to.
     if (KernelContextSwitch(KCCopy, (void *)init, NULL) != 0) {
         helper_abort("KernelStart: KernelContextSwitch(KCCopy) failed");
     }
 
-    //make init the first process to run in user mode.
-    current_process = init;
+    if (current_process == idle) {
+        current_process = init;
+        if (KernelContextSwitch(KCSwitch, (void *)idle, (void *)init) != 0) {
+            helper_abort("KernelStart: KernelContextSwitch(KCSwitch) failed");
+        }
+    }
 
-    //switch the hardware to init's Region 1 so we return into init's userland.
-    WriteRegister(REG_PTBR1, (unsigned int)init->region1_pt);
+    //switch the hardware to the selected process's Region 1 before returning.
+    WriteRegister(REG_PTBR1, (unsigned int)current_process->region1_pt);
     WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
 
-    //copy init's user context into the hardware-provided slot so the CPU
-    //returns to init's entry point when KernelStart returns.
-    memcpy(uctxt, &init->user_context, sizeof(UserContext));
-=======
-    //flush translations now that virtual memory is enabled.
-    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_ALL);
-
-    //copy idle's modified context into the hardware-provided return context.
-    memcpy(uctxt, &idle->user_context, sizeof(UserContext));
->>>>>>> c53601ad509b09c75d4440619ebd312af9c5e6e9
+    //copy the selected user context into the hardware-provided slot.
+    memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
 
     TracePrintf(0, "KernelStart: leaving KernelStart\n");
 }

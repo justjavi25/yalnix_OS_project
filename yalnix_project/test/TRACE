@@ -1,0 +1,438 @@
+** Hardware level 1 tracing enabled **
+** Yalnix level 1 tracing enabled **
+** User Prog level 1 tracing enabled **
+Hardware   Kernel heap OK.
+Hardware   Kernel heap usage: 6 blocks allocated, 1848 bytes total
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(10), depth 1
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware   ----
+Hardware   | Calling KernelStart
+Hardware   ----
+Hardware   Kernel heap OK.
+Hardware   Kernel heap usage: 7 blocks allocated, 1940 bytes total
+Yalnix     KernelStart: booting
+Yalnix     InitPhysicalMemory: 512 frames available
+Hardware       | WriteRegister(REG_VECTOR_BASE,0x028ec0)
+Hardware       | WriteRegister(REG_PTBR0,0x02a854)
+Hardware       | WriteRegister(REG_PTLR0,0x000080)
+Hardware       | WriteRegister(REG_PTBR1,0x02ac68)
+Hardware       | WriteRegister(REG_PTLR1,0x000080)
+Hardware       | WriteRegister(REG_VM_ENABLE,0x000001)
+Hardware   Enabling VM
+Hardware   _first_kernel_text_page 16
+Hardware   _first_kernel_data_page 19
+Hardware   _orig_kernel_brk_page 25
+Hardware   initializing TLB to be empty
+Hardware   PhysLimit 32000, my_break 32000
+Hardware   clearing TLB
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2ac68, PTLR1 0x80
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   moving kernel text,data,heap into TLB
+Hardware   PageInTLB[16] addr 0x20000: 0 -> 1
+Hardware   PageInTLB[17] addr 0x22000: 0 -> 1
+Hardware   PageInTLB[18] addr 0x24000: 0 -> 1
+Hardware   PageInTLB[19] addr 0x26000: 0 -> 1
+Hardware   PageInTLB[20] addr 0x28000: 0 -> 1
+Hardware   PageInTLB[21] addr 0x2a000: 0 -> 1
+Hardware   PageInTLB[22] addr 0x2c000: 0 -> 1
+Hardware   PageInTLB[23] addr 0x2e000: 0 -> 1
+Hardware   PageInTLB[24] addr 0x30000: 0 -> 1
+Hardware   moving kernel stack into TLB
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_ALL)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2ac68, PTLR1 0x80
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware       | WriteRegister(REG_PTBR1,0x02b07c)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   Kernel heap OK.
+Hardware   Kernel heap usage: 12 blocks allocated, 4448 bytes total
+Yalnix     prog_size 4, text 2 data 2 bss 0 pages
+Yalnix     LoadProgram: heap_size 4, stack_size 1
+Hardware   Kernel heap OK.
+Hardware   Kernel heap usage: 13 blocks allocated, 4464 bytes total
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x022242
+Hardware   | From kernelmode SP [region 0] 0xff090 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,0x06x, page 1024000)
+Hardware   FlushTLB(addr 0x000fa000, page 0x7d)
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware       ----
+Hardware       | TLB miss p:125  -> pfn:026
+Hardware       | In SP [kcs stack] 0xe8809bcc | PC [region 0] 0x24229
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware       ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,0x06x, page 1024000)
+Hardware   FlushTLB(addr 0x000fa000, page 0x7d)
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Hardware       ----
+Hardware       | TLB miss p:125  -> pfn:027
+Hardware       | In SP [kcs stack] 0xe8809bcc | PC [region 0] 0x24229
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware       ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,0x06x, page 1024000)
+Hardware   FlushTLB(addr 0x000fa000, page 0x7d)
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x022242
+Hardware   | Going to kernelmode SP [region 0] 0xff090 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff090 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff090 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02b07c)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   Kernel heap OK.
+Hardware   Kernel heap usage: 12 blocks allocated, 4448 bytes total
+Yalnix     KernelStart: leaving KernelStart
+Hardware   ----
+Hardware   | Back from KernelStart
+Hardware   | HELPER setting Proc 1 kstack to 26 27
+Hardware   | Off to usermode SP [region 1] 0x1fff60 | PC [region 1] 0x100120
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:128  -> pfn:028
+Hardware       | In SP [region 1] 0x1fff60 | PC [region 1] 0x100120
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:129  -> pfn:029
+Hardware       | In SP [region 1] 0x1fff1c | PC [region 1] 0x103390
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:131  -> pfn:031
+Hardware       | In SP [region 1] 0x1ffed0 | PC [region 1] 0x100582
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:130  -> pfn:030
+Hardware       | In SP [region 1] 0x1ffe90 | PC [region 1] 0x1012eb
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware   ----
+Hardware   | Syscall trap Brk
+Hardware   | From usermode  SP [region 1] 0x1ffe24 | PC [region 1] 0x1005e4
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x23148 for trap TRAP_KERNEL (Brk)
+Hardware   ----
+Yalnix     kernel trap syscall code=0xabcdef06
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x23148 for trap TRAP_KERNEL (Brk)
+Hardware   | Off to usermode SP [region 1] 0x1ffe24 | PC [region 1] 0x1005e4
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:128  -> pfn:028
+Hardware       | In SP [region 1] 0x1ffe24 | PC [region 1] 0x1005e4
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:130  -> pfn:030
+Hardware       | In SP [region 1] 0x1ffe40 | PC [region 1] 0x10108c
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:131  -> pfn:031
+Hardware       | In SP [region 1] 0x1ffe70 | PC [region 1] 0x101f8d
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:129  -> pfn:029
+Hardware       | In SP [region 1] 0x1ffe70 | PC [region 1] 0x101ffa
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware   ----
+Hardware   | Syscall trap GetPid
+Hardware   | From usermode  SP [region 1] 0x1ffec0 | PC [region 1] 0x1005a9
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x23148 for trap TRAP_KERNEL (GetPid)
+Hardware   ----
+Yalnix     kernel trap syscall code=0xabcdef05
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x23148 for trap TRAP_KERNEL (GetPid)
+Hardware   | Off to usermode SP [region 1] 0x1ffec0 | PC [region 1] 0x1005a9
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+User Prog  cp4_exec: Starting with PID 1
+User Prog  cp4_exec: About to call Exec to replace with cp4_fork
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware   ----
+Hardware   | Syscall trap Exec
+Hardware   | From usermode  SP [region 1] 0x1ffeb0 | PC [region 1] 0x1004d0
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x23148 for trap TRAP_KERNEL (Exec)
+Hardware   ----
+Yalnix     kernel trap syscall code=0xabcdef02
+Hardware       | WriteRegister(REG_PTBR1,0x02b07c)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 2
+Yalnix     LoadProgram: can't open file 'cp4_fork'
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x23148 for trap TRAP_KERNEL (Exec)
+Hardware   | Off to usermode SP [region 1] 0x1ffeb0 | PC [region 1] 0x1004d0
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:128  -> pfn:028
+Hardware       | In SP [region 1] 0x1ffeb0 | PC [region 1] 0x1004d0
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:131  -> pfn:031
+Hardware       | In SP [region 1] 0x1ffe80 | PC [region 1] 0x1012a5
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:130  -> pfn:030
+Hardware       | In SP [region 1] 0x1ffe80 | PC [region 1] 0x1012eb
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+User Prog  cp4_exec: exec failed with status -1
+User Prog  cp4_exec: exec should not return on success
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(14), depth 1
+Hardware   clock tick 1
+Hardware   ----
+Hardware   | Trap Alarm clock
+Hardware   | From usermode  SP [region 1] 0x1ffd80 | PC [vdso] 0xe886c579
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   ----
+Yalnix     clock trap
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff090 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02ac68)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2ac68, PTLR1 0x80
+Yalnix     KernelStart: leaving KernelStart
+Hardware   ----
+Hardware   | Back from KernelStart
+Hardware   | HELPER setting Proc 0 kstack to 126 127
+Hardware   | Off to usermode SP [region 1] 0x1ffffc | PC [region 0] 0x21980
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   ----
+Yalnix     DoIdle
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(14), depth 1
+Hardware   clock tick 2
+Hardware   ----
+Hardware   | Trap Alarm clock
+Hardware   | From usermode  SP [region 1] 0x1ffea0 | PC [vdso] 0xe886c579
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   | Calling Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   ----
+Yalnix     clock trap
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02b07c)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   | Off to usermode SP [region 1] 0x1ffd80 | PC [vdso] 0xe886c579
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:129  -> pfn:029
+Hardware       | In SP [region 1] 0x1ffed0 | PC [region 1] 0x10247e
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:128  -> pfn:028
+Hardware       | In SP [region 1] 0x1ffee0 | PC [region 1] 0x10032e
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(14), depth 1
+Hardware   clock tick 3
+Hardware   ----
+Hardware   | Trap Alarm clock
+Hardware   | From usermode  SP [region 1] 0x1ffd80 | PC [vdso] 0xe886c579
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   ----
+Yalnix     clock trap
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02ac68)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2ac68, PTLR1 0x80
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   | Off to usermode SP [region 1] 0x1ffea0 | PC [vdso] 0xe886c579
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   ----
+Yalnix     DoIdle
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(14), depth 1
+Hardware   clock tick 4
+Hardware   ----
+Hardware   | Trap Alarm clock
+Hardware   | From usermode  SP [region 1] 0x1ffea0 | PC [vdso] 0xe886c579
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   | Calling Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   ----
+Yalnix     clock trap
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02b07c)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2b07c, PTLR1 0x80
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   | Off to usermode SP [region 1] 0x1ffd80 | PC [vdso] 0xe886c579
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:129  -> pfn:029
+Hardware       | In SP [region 1] 0x1ffed0 | PC [region 1] 0x10247e
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(11), depth 1
+Hardware       ----
+Hardware       | TLB miss p:128  -> pfn:028
+Hardware       | In SP [region 1] 0x1ffee0 | PC [region 1] 0x10032e
+Hardware       | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware       ----
+Hardware   ========= Hardware receives signal ==============
+Hardware   FrameworkSignalHandler(14), depth 1
+Hardware   clock tick 5
+Hardware   ----
+Hardware   | Trap Alarm clock
+Hardware   | From usermode  SP [region 1] 0x1ffd80 | PC [vdso] 0xe886c579
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   | Calling Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   ----
+Yalnix     clock trap
+Hardware   ----
+Hardware   | On [kcs stack] invoking  MyKCS function 0x02233d
+Hardware   | From kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 026 027
+Hardware   ----
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_0)
+Hardware   FlushTLB(TLB_FLUSH_0): PTBR0 0x2a854, PTLR0 0x80
+Hardware   ----
+Hardware   | On [kcs stack] returning from MyKCS function 0x02233d
+Hardware   | Going to kernelmode SP [region 0] 0xff0a0 | PC [libhardware.so] 0xe87f2cfb
+Hardware   | pid 1 | PTBR1 0x02b07c | kstack 126 127
+Hardware   ----
+Hardware       | WriteRegister(REG_PTBR1,0x02ac68)
+Hardware       | WriteRegister(REG_TLB_FLUSH,TLB_FLUSH_1)
+Hardware   FlushTLB(TLB_FLUSH_1): PTBR1 0x2ac68, PTLR1 0x80
+Hardware   ----
+Hardware   | Back from Yalnix handler 0x2323d for trap TRAP_CLOCK
+Hardware   | Off to usermode SP [region 1] 0x1ffea0 | PC [vdso] 0xe886c579
+Hardware   | pid 0 | PTBR1 0x02ac68 | kstack 126 127
+Hardware   ----
+Yalnix     DoIdle

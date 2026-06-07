@@ -2,6 +2,7 @@
 #define PROCESS_H
 
 #include <hardware.h>
+#include "queue.h"
 
 //minimal process control block needed for checkpoint 2.
 typedef struct pcb {
@@ -19,6 +20,36 @@ typedef struct pcb {
 
     //physical pages currently used for this process's kernel stack.
     int kernel_stack_pages[KERNEL_STACK_MAXSIZE / PAGESIZE];
+
+    //lowest Region 1 page not used by the loaded program's data/heap.
+    int brk_page;
+
+    //lowest legal heap break page for this process.
+    int min_brk_page;
+
+    //first Region 1 page currently mapped for the user stack.
+    int stack_base_page;
+
+    //nonzero when the process is blocked in Delay.
+    int delayed;
+
+    //clock tick on or after which a delayed process can run again.
+    int wake_tick;
+
+    //parent process pointer for Wait syscall.
+    struct pcb *parent;
+
+    //nonzero if this process has exited and is waiting to be reaped.
+    int is_zombie;
+
+    //exit status saved for parent to retrieve via Wait.
+    int exit_status;
+
+    //nonzero if parent is blocked waiting for this child.
+    int parent_waiting;
+
+    //nonzero if this process has actually run on the hardware yet.
+    int has_run;
 } pcb_t;
 
 //the process currently running or about to return to user mode.
@@ -30,6 +61,9 @@ extern pcb_t *idle_process;
 //the special init process.
 extern pcb_t *init_process;
 
+//the ready queue of processes available to run.
+extern process_queue_t ready_queue;
+
 //initializes process-level globals.
 void InitProcessSystem(void);
 
@@ -40,12 +74,21 @@ pcb_t *CreateIdleProcess(UserContext *boot_context);
 void DoIdle(void);
 
 //creates the init process PCB and loads its program into Region 1.
-pcb_t *CreateInitProces(UserContext *init_context, char *name, char **args);
+pcb_t *CreateInitProcess(UserContext *init_context, char *name, char **args);
 
 //loads a Linux executable into a process's Region 1 address space.
 int LoadProgram(char *name, char *args[], pcb_t *proc);
 
 //KCSFunc_t for cloning the current kernel context+stack into a new process.
 KernelContext *KCCopy(KernelContext *kc_in, void *new_pcb_p, void *not_used);
+
+//KCSFunc_t for switching from one existing process to another.
+KernelContext *KCSwitch(KernelContext *kc_in, void *old_pcb_p, void *new_pcb_p);
+
+//create a new process by cloning the current process (for Fork).
+pcb_t *CloneProcess(pcb_t *parent);
+
+//free all resources used by a process (for process death).
+void FreeProcess(pcb_t *proc);
 
 #endif

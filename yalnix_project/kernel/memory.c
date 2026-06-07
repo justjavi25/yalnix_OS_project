@@ -45,7 +45,7 @@ static void MarkFrameFree(int pfn)
     frame_used[pfn] = FRAME_FREE;
 }
 
-//return nonzero when the physical frame is valid and free.
+//return not zero when the physical frame is valid and free.
 static int IsFrameFree(int pfn)
 {
     if (pfn < 0 || pfn >= total_frames) {
@@ -77,7 +77,7 @@ void InitPhysicalMemory(unsigned int pmem_size)
     //Convert the physical memory byte count into page frame count
     total_frames = pmem_size / PAGESIZE;
     if (total_frames > MAX_PHYSICAL_FRAMES) {
-        //Keep the bitmap from being indexed beyond its size
+        //Keep the  bitmap from being indexed beyond its size
         total_frames = MAX_PHYSICAL_FRAMES;
     }
     //clear the entire frame bitmap
