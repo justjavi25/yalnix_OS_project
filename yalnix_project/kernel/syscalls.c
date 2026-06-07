@@ -224,6 +224,8 @@ static int KernelFork(void)
 
     if (current_process != NULL && current_process->fork_return_zero) {
         current_process->fork_return_zero = 0;
+        WriteRegister(REG_PTBR1, (unsigned int)current_process->region1_pt);
+        WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
         return 0;
     }
 
