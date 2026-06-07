@@ -48,6 +48,16 @@ typedef struct pcb {
     //nonzero if parent is blocked waiting for this child.
     int parent_waiting;
 
+    //nonzero if this process is blocked in Wait.
+    int wait_blocked;
+
+    //user-space status pointer supplied to Wait while blocked.
+    int *wait_status_ptr;
+
+    //saved status to copy out when a blocked Wait resumes.
+    int wait_status_ready;
+    int wait_status_value;
+
     //nonzero if this process has actually run on the hardware yet.
     int has_run;
 } pcb_t;
@@ -63,6 +73,9 @@ extern pcb_t *init_process;
 
 //the ready queue of processes available to run.
 extern process_queue_t ready_queue;
+
+//all processes that have not been fully reaped/freed.
+extern process_queue_t all_processes;
 
 //initializes process-level globals.
 void InitProcessSystem(void);
@@ -90,5 +103,9 @@ pcb_t *CloneProcess(pcb_t *parent);
 
 //free all resources used by a process (for process death).
 void FreeProcess(pcb_t *proc);
+
+//record/remove a process in the global process list.
+void RegisterProcess(pcb_t *proc);
+void UnregisterProcess(pcb_t *proc);
 
 #endif

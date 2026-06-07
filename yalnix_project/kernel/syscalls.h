@@ -6,4 +6,7 @@
 //dispatches one TRAP_KERNEL syscall. Returns nonzero if the caller blocked.
 int DispatchSyscall(UserContext *uctxt, int current_tick);
 
+//terminate the current process with the supplied status.
+void KernelExitProcess(int status);
+
 #endif

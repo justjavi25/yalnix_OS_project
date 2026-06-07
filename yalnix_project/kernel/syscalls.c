@@ -120,6 +120,83 @@ static int KernelDelay(int clock_ticks, int current_tick)
 /*----------------------------------------------------------------------------------*/
 //CHECKPOINT 4: Fork, Exec, Wait
 
+static pcb_t *FindChild(pcb_t *parent, int want_zombie)
+{
+    queue_node_t *node = all_processes.head;
+
+    while (node != NULL) {
+        pcb_t *proc = node->process;
+        if (proc != NULL && proc->parent == parent &&
+            (!want_zombie || proc->is_zombie)) {
+            return proc;
+        }
+        node = node->next;
+    }
+
+    return NULL;
+}
+
+static void OrphanChildren(pcb_t *parent)
+{
+    queue_node_t *node = all_processes.head;
+
+    while (node != NULL) {
+        queue_node_t *next = node->next;
+        pcb_t *proc = node->process;
+        if (proc != NULL && proc->parent == parent) {
+            if (proc->is_zombie) {
+                UnregisterProcess(proc);
+                FreeProcess(proc);
+            } else {
+                proc->parent = NULL;
+            }
+        }
+        node = next;
+    }
+}
+
+static void WakeWaitingParent(pcb_t *child)
+{
+    pcb_t *parent = child->parent;
+
+    if (parent == NULL || !parent->wait_blocked) {
+        return;
+    }
+
+    parent->user_context.regs[0] = child->pid;
+    parent->wait_status_value = child->exit_status;
+    parent->wait_status_ready = 1;
+    parent->wait_blocked = 0;
+    child->parent = NULL;
+
+    if (!IsProcessInQueue(&ready_queue, parent)) {
+        EnqueueProcess(&ready_queue, parent);
+    }
+}
+
+void KernelExitProcess(int status)
+{
+    if (current_process == NULL) {
+        return;
+    }
+
+    if (current_process == init_process) {
+        TracePrintf(0, "init process exited with status %d; halting\n", status);
+        Halt();
+    }
+
+    TracePrintf(1, "KernelExit: PID %d status %d\n",
+                current_process->pid, status);
+
+    OrphanChildren(current_process);
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    current_process->exit_status = status;
+    current_process->is_zombie = 1;
+    current_process->delayed = 0;
+    current_process->wait_blocked = 0;
+    WakeWaitingParent(current_process);
+}
+
 
 //fork syscall: create a child process that is an exact copy of the current process.
 static int KernelFork(void)
@@ -140,8 +217,13 @@ static int KernelFork(void)
     //set up the child's kernel context with its own kernel stack.
     if (KernelContextSwitch(KCCopy, (void *)child, NULL) != 0) {
         //failed to set up child's kernel context.
+        UnregisterProcess(child);
         FreeProcess(child);
         return ERROR;
+    }
+
+    if (current_process == child) {
+        return 0;
     }
 
     //debug: check child's PC after KCCopy and PCB addresses.
@@ -209,7 +291,7 @@ static int KernelExec(char *filename, char *argv[])
     if (result != SUCCESS) {
         //LoadProgram failed, the process is now in an inconsistent state.
         //return ERROR to indicate failure.
-        return ERROR;
+        return result;
     }
 
     //exec never returns on success - the new program starts executing.
@@ -225,19 +307,45 @@ static int KernelExec(char *filename, char *argv[])
 //wait syscall: wait for a child process to exit and retrieve its exit status.
 static int KernelWait(int *status_ptr)
 {
-    //cannot wait if there is no current process.
+    pcb_t *child;
+    int child_pid;
+
     if (current_process == NULL) {
         return ERROR;
     }
 
-    //check if we have any children at all.
-    //since we don't have a process tree structure yet, we need to find children.
-    //for now, we'll scan for any process that has this as parent.
-    //this is a simplified implementation for checkpoint 4.
+    child = FindChild(current_process, 1);
+    if (child != NULL) {
+        child_pid = child->pid;
+        if (status_ptr != NULL) {
+            *status_ptr = child->exit_status;
+        }
+        UnregisterProcess(child);
+        FreeProcess(child);
+        return child_pid;
+    }
 
-    //for now, return ERROR since we don't have full process tracking yet.
-    //TODO: implement full process tree in checkpoint 4.
-    return ERROR;
+    child = FindChild(current_process, 0);
+    if (child == NULL) {
+        return ERROR;
+    }
+
+    current_process->wait_blocked = 1;
+    current_process->wait_status_ptr = status_ptr;
+    current_process->wait_status_ready = 0;
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    return SUCCESS;
+}
+
+static int KernelWaitDispatch(int *status_ptr, int *blocked)
+{
+    int rc = KernelWait(status_ptr);
+
+    if (current_process != NULL && current_process->wait_blocked) {
+        *blocked = 1;
+    }
+
+    return rc;
 }
 
 int DispatchSyscall(UserContext *uctxt, int current_tick)
@@ -260,6 +368,11 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
                    current_process->delayed);
         break;
 
+    case YALNIX_EXIT:
+        KernelExitProcess((int)uctxt->regs[0]);
+        blocked = 1;
+        break;
+
     case YALNIX_FORK:
         //fork syscall: child gets 0, parent gets child's PID.
         uctxt->regs[0] = KernelFork();
@@ -268,15 +381,21 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
     case YALNIX_EXEC:
         //exec syscall: does not return on success, returns ERROR on failure.
         uctxt->regs[0] = KernelExec((char *)uctxt->regs[0], (char **)uctxt->regs[1]);
+        if (uctxt->regs[0] == KILL) {
+            KernelExitProcess(ERROR);
+            blocked = 1;
+            break;
+        }
         //after exec succeeds, update uctxt with the new program's context.
         //LoadProgram sets the PC and SP in current_process->user_context.
-        memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
+        if (uctxt->regs[0] == SUCCESS) {
+            memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
+        }
         break;
 
     case YALNIX_WAIT:
         //wait syscall: parent waits for child to exit.
-        uctxt->regs[0] = KernelWait((int *)uctxt->regs[0]);
-        //TODO: implement blocking when child hasn't exited yet.
+        uctxt->regs[0] = KernelWaitDispatch((int *)uctxt->regs[0], &blocked);
         break;
 
     default:

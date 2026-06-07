@@ -19,6 +19,8 @@ pcb_t *idle_process = NULL;
 pcb_t *init_process = NULL;
 //the ready queue of processes available to run.
 process_queue_t ready_queue;
+//all processes that have not yet been reaped/freed.
+process_queue_t all_processes;
 
 
 
@@ -35,6 +37,23 @@ void InitProcessSystem(void)
     init_process = NULL;
     //initialize the ready queue to be empty.
     InitProcessQueue(&ready_queue);
+    //initialize the global process list to be empty.
+    InitProcessQueue(&all_processes);
+}
+
+void RegisterProcess(pcb_t *proc)
+{
+    if (proc != NULL && !IsProcessInQueue(&all_processes, proc)) {
+        EnqueueProcess(&all_processes, proc);
+    }
+}
+
+void UnregisterProcess(pcb_t *proc)
+{
+    if (proc != NULL) {
+        RemoveProcessFromQueue(&ready_queue, proc);
+        RemoveProcessFromQueue(&all_processes, proc);
+    }
 }
 
 //the checkpoint-2 idle function that runs after KernelStart returns to user mode.
@@ -110,6 +129,7 @@ pcb_t *CreateIdleProcess(UserContext *boot_context)
 
     //save the global idle process pointer for later scheduler code.
     idle_process = idle;
+    RegisterProcess(idle);
 
     //return the completed idle PCB to KernelStart.
     return idle;
@@ -311,13 +331,13 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
       int pfn = AllocFrame();
       if(pfn == ERROR) {
         close(fd);
-        return ERROR;
+        return KILL;
       }
 
       if (MapPage(proc->region1_pt, text_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
         FreeFrame(pfn);
         close(fd);
-        return ERROR;
+        return KILL;
       }
     }
 
@@ -331,13 +351,13 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
       int pfn = AllocFrame();
       if(pfn == ERROR) {
         close(fd);
-        return ERROR;
+        return KILL;
       }
 
       if (MapPage(proc->region1_pt, data_pg1 + i, pfn, PROT_READ | PROT_WRITE) == ERROR) {
         FreeFrame(pfn);
         close(fd);
-        return ERROR;
+        return KILL;
       }
     }
 
@@ -351,13 +371,13 @@ LoadProgram(char *name, char *args[], pcb_t* proc)
       int pfn = AllocFrame();
       if(pfn == ERROR) {
         close(fd);
-        return ERROR;
+        return KILL;
       }
 
       if (MapPage(proc->region1_pt, MAX_PT_LEN - i - 1, pfn, PROT_READ | PROT_WRITE) == ERROR) {
         FreeFrame(pfn);
         close(fd);
-        return ERROR;
+        return KILL;
       }
   }
 
@@ -586,9 +606,7 @@ pcb_t *CreateInitProcess(UserContext *init_context, char *name, char **args){
 
     //save the global init process pointer for later scheduler code.
     init_process = init;
-
-    //add init to the ready queue so it can be scheduled.
-    EnqueueProcess(&ready_queue, init);
+    RegisterProcess(init);
 
     //return the completed init PCB to KernelStart.
     return init;
@@ -668,49 +686,39 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
     TracePrintf(0, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
                 parent_proc->user_context.pc, child->user_context.pc);
 
-    //TEMPORARY FIX: skip Region 1 page copy to avoid heap corruption in scratch page mapping.
-    //TODO: implement copy-on-write instead of deep copy.
-    //
-    //for now, child shares parent's Region 1 page table.
-    child->region1_pt = parent_proc->region1_pt;
-    //
-    //copy each page from parent's Region 1 to child's Region 1.
-    // for (int vpn = 0; vpn < MAX_PT_LEN; vpn++) {
-    //     //check if the parent has this page mapped.
-    //     if (parent_proc->region1_pt[vpn].valid) {
-    //         //allocate a new frame for the child's copy of this page.
-    //         int new_pfn = AllocFrame();
-    //
-    //         if (new_pfn == ERROR) {
-    //             //could not allocate frame, clean up and return NULL.
-    //             FreeProcess(child);
-    //             return NULL;
-    //         }
-    //
-    //         //temporarily map parent's page to scratch_vpn2 for reading.
-    //         int parent_pfn = parent_proc->region1_pt[vpn].pfn;
-    //         MapPage(r0_pt, scratch_vpn2, parent_pfn, PROT_READ);
-    //         WriteRegister(REG_TLB_FLUSH, scratch_vpn2 << PAGESHIFT);
-    //
-    //         //temporarily map child's new frame to scratch_vpn for writing.
-    //         MapPage(r0_pt, scratch_vpn, new_pfn, PROT_READ | PROT_WRITE);
-    //         WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
-    //
-    //         //copy the page contents from parent to child.
-    //         void *src = (void *)(scratch_vpn2 << PAGESHIFT);
-    //         void *dst = (void *)(scratch_vpn << PAGESHIFT);
-    //         memcpy(dst, src, PAGESIZE);
-    //
-    //         //set up the child's page table entry with the same protection as parent.
-    //         child->region1_pt[vpn] = parent_proc->region1_pt[vpn];
-    //         child->region1_pt[vpn].pfn = new_pfn;
-    //     }
-    // }
-    //
-    // //unmap the scratch pages.
-    // r0_pt[scratch_vpn].valid = 0;
-    // r0_pt[scratch_vpn2].valid = 0;
-    // WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_0);
+    //copy each valid Region 1 page into a private child frame.
+    for (int vpn = 0; vpn < MAX_PT_LEN; vpn++) {
+        if (parent_proc->region1_pt[vpn].valid) {
+            int new_pfn = AllocFrame();
+
+            if (new_pfn == ERROR) {
+                FreeProcess(child);
+                return NULL;
+            }
+
+            if (MapPage(r0_pt, scratch_vpn2, parent_proc->region1_pt[vpn].pfn,
+                        PROT_READ) == ERROR ||
+                MapPage(r0_pt, scratch_vpn, new_pfn,
+                        PROT_READ | PROT_WRITE) == ERROR) {
+                FreeFrame(new_pfn);
+                FreeProcess(child);
+                return NULL;
+            }
+
+            WriteRegister(REG_TLB_FLUSH, scratch_vpn2 << PAGESHIFT);
+            WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
+            memcpy((void *)(scratch_vpn << PAGESHIFT),
+                   (void *)(scratch_vpn2 << PAGESHIFT),
+                   PAGESIZE);
+
+            child->region1_pt[vpn] = parent_proc->region1_pt[vpn];
+            child->region1_pt[vpn].pfn = new_pfn;
+        }
+    }
+
+    r0_pt[scratch_vpn].valid = 0;
+    r0_pt[scratch_vpn2].valid = 0;
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_0);
 
     //copy the heap and stack boundary information from parent.
     child->brk_page = parent_proc->brk_page;
@@ -719,6 +727,11 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
 
     //child is ready to run, not blocked.
     child->delayed = 0;
+    child->wait_blocked = 0;
+    child->is_zombie = 0;
+    child->has_run = 0;
+
+    RegisterProcess(child);
 
     //return the newly created child process.
     return child;
