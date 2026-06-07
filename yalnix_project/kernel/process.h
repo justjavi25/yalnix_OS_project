@@ -60,6 +60,9 @@ typedef struct pcb {
 
     //nonzero if this process has actually run on the hardware yet.
     int has_run;
+
+    //child side of Fork should force the syscall return value to 0.
+    int fork_return_zero;
 } pcb_t;
 
 //the process currently running or about to return to user mode.

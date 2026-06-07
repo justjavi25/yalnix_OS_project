@@ -713,6 +713,8 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
 
             child->region1_pt[vpn] = parent_proc->region1_pt[vpn];
             child->region1_pt[vpn].pfn = new_pfn;
+            WriteRegister(REG_TLB_FLUSH, scratch_vpn2 << PAGESHIFT);
+            WriteRegister(REG_TLB_FLUSH, scratch_vpn << PAGESHIFT);
         }
     }
 
@@ -730,6 +732,7 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
     child->wait_blocked = 0;
     child->is_zombie = 0;
     child->has_run = 0;
+    child->fork_return_zero = 1;
 
     RegisterProcess(child);
 

@@ -222,7 +222,8 @@ static int KernelFork(void)
         return ERROR;
     }
 
-    if (current_process == child) {
+    if (current_process != NULL && current_process->fork_return_zero) {
+        current_process->fork_return_zero = 0;
         return 0;
     }
 
@@ -375,6 +376,7 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
 
     case YALNIX_FORK:
         //fork syscall: child gets 0, parent gets child's PID.
+        memcpy(&current_process->user_context, uctxt, sizeof(UserContext));
         uctxt->regs[0] = KernelFork();
         break;
 
