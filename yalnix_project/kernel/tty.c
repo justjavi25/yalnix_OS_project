@@ -339,6 +339,7 @@ void HandleTtyReceive(int tty_id)
         return;
     }
 
+    TracePrintf(0, "HandleTtyReceive: tty %d received %d bytes\n", tty_id, len);
     EnqueueLine(tty_id, buf, len);
     ServiceReaders(tty_id);
 }

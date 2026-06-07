@@ -20,21 +20,21 @@ int main(void)
 
     TracePrintf(0, "cp5_tty_read: starting\n");
 
-    n1 = TtyRead(1, buf, 4);
+    n1 = TtyRead(0, buf, 4);
     TracePrintf(0, "cp5_tty_read: first read returned %d\n", n1);
     if (n1 != 4 || !BytesEqual(buf, "abcd", 4)) {
         TracePrintf(0, "cp5_tty_read: FAIL first read\n");
         Exit(1);
     }
 
-    n2 = TtyRead(1, buf, sizeof(buf));
+    n2 = TtyRead(0, buf, sizeof(buf));
     TracePrintf(0, "cp5_tty_read: second read returned %d\n", n2);
     if (n2 != 6 || !BytesEqual(buf, "efghi\n", 6)) {
         TracePrintf(0, "cp5_tty_read: FAIL second read\n");
         Exit(2);
     }
 
-    n3 = TtyRead(1, buf, sizeof(buf));
+    n3 = TtyRead(0, buf, sizeof(buf));
     TracePrintf(0, "cp5_tty_read: third read returned %d\n", n3);
     if (n3 != 7 || !BytesEqual(buf, "second\n", 7)) {
         TracePrintf(0, "cp5_tty_read: FAIL third read\n");
