@@ -1,0 +1,17 @@
+===== test/cp4_fork =====
+
+===== test/cp4_fork_multi =====
+
+===== test/cp4_fork_exec =====
+
+===== test/cp4_wait =====
+
+===== test/cp4_fork =====
+
+===== test/cp4_fork_multi =====
+
+===== test/cp4_fork_exec =====
+
+===== test/cp4_wait =====
+
+f

@@ -6,6 +6,7 @@
 #include "process.h"
 #include "trap.h"
 #include "tty.h"
+#include "syscalls.h"
 
 //KernelStart: Entry point for the Yalnix kernel.
 //initialize free frame tracking
@@ -25,7 +26,10 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 
     //initialize process globals before creating the idle process.
     InitProcessSystem();
+    // initialize TTY system for terminal I/O.
     InitTtySystem();
+    // initialize pipe system for IPC.
+    InitPipeSystem();
 
     //fill the trap vector with handlers.
     init_trap_vector();

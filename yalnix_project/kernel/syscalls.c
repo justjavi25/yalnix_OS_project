@@ -5,6 +5,7 @@
 #include <hardware.h>
 #include <yalnix.h>
 #include <ykernel.h>
+#include <string.h>
 
 static int AddrToRegion1Page(void *addr)
 {
@@ -351,6 +352,665 @@ static int KernelWaitDispatch(int *status_ptr, int *blocked)
     return rc;
 }
 
+/*----------------------------------------------------------------------------------*/
+//CHECKPOINT 6: Pipes, Locks, Condition Variables
+
+#define MAX_PIPES 256
+
+// pipe data structure
+typedef struct {
+    int id;
+    int valid;
+    // circular buffer for pipe data
+    char buffer[PIPE_BUFFER_LEN];
+    int read_pos;
+    int write_pos;
+    int filled;
+    // queues for blocked processes
+    process_queue_t read_queue;
+    process_queue_t write_queue;
+} pipe_t;
+
+// lock data structure
+typedef struct {
+    int id;
+    int valid;
+    // owner process id
+    int owner_pid;
+    // whether lock is currently held
+    int held;
+    // queue of processes waiting for lock
+    process_queue_t wait_queue;
+} lock_t;
+
+// condition variable data structure
+typedef struct {
+    int id;
+    int valid;
+    // queue of processes waiting on this cvar
+    process_queue_t wait_queue;
+} cvar_t;
+
+// global pipe table
+static pipe_t pipes[MAX_PIPES];
+// next pipe id to assign
+static int next_pipe_id = 0;
+
+// global lock table
+static lock_t locks[MAX_PIPES];
+// next lock id to assign
+static int next_lock_id = 0;
+
+// global cvar table
+static cvar_t cvars[MAX_PIPES];
+// next cvar id to assign
+static int next_cvar_id = 0;
+
+// initialize pipe system
+void InitPipeSystem(void)
+{
+    // clear all pipes
+    for (int i = 0; i < MAX_PIPES; i++) {
+        pipes[i].valid = 0;
+        pipes[i].id = -1;
+        pipes[i].read_pos = 0;
+        pipes[i].write_pos = 0;
+        pipes[i].filled = 0;
+        InitProcessQueue(&pipes[i].read_queue);
+        InitProcessQueue(&pipes[i].write_queue);
+    }
+    // start pipe ids at 1000 to avoid conflicts
+    next_pipe_id = 1000;
+
+    // clear all locks
+    for (int i = 0; i < MAX_PIPES; i++) {
+        locks[i].valid = 0;
+        locks[i].id = -1;
+        locks[i].owner_pid = -1;
+        locks[i].held = 0;
+        InitProcessQueue(&locks[i].wait_queue);
+    }
+    // start lock ids at 2000
+    next_lock_id = 2000;
+
+    // clear all cvars
+    for (int i = 0; i < MAX_PIPES; i++) {
+        cvars[i].valid = 0;
+        cvars[i].id = -1;
+        InitProcessQueue(&cvars[i].wait_queue);
+    }
+    // start cvar ids at 3000
+    next_cvar_id = 3000;
+}
+
+// find pipe by id
+static pipe_t *FindPipe(int pipe_id)
+{
+    // search pipe table for matching id
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (pipes[i].valid && pipes[i].id == pipe_id) {
+            return &pipes[i];
+        }
+    }
+    return NULL;
+}
+
+// allocate new pipe from global table
+static int AllocPipe(void)
+{
+    // find first free pipe slot
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (!pipes[i].valid) {
+            // mark as valid and initialize
+            pipes[i].valid = 1;
+            pipes[i].id = next_pipe_id++;
+            pipes[i].read_pos = 0;
+            pipes[i].write_pos = 0;
+            pipes[i].filled = 0;
+            return pipes[i].id;
+        }
+    }
+    // table full
+    return ERROR;
+}
+
+// syscall: create new pipe
+static int KernelPipeInit(int *pipe_idp)
+{
+    // validate args
+    if (pipe_idp == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // allocate pipe
+    int pipe_id = AllocPipe();
+    if (pipe_id == ERROR) {
+        return ERROR;
+    }
+
+    // return id to userland
+    *pipe_idp = pipe_id;
+    return SUCCESS;
+}
+
+// syscall: read from pipe
+static int KernelPipeRead(int pipe_id, void *buf, int len, int *blocked)
+{
+    pipe_t *pipe;
+    int available;
+    int to_copy;
+
+    // validate args
+    if (buf == NULL || len < 0 || blocked == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // find pipe
+    pipe = FindPipe(pipe_id);
+    if (pipe == NULL) {
+        return ERROR;
+    }
+
+    // check how much data available
+    available = pipe->filled;
+
+    // if empty, block reader on this pipe
+    if (available == 0) {
+        current_process->pipe_read_blocked = 1;
+        current_process->pipe_read_id = pipe_id;
+        current_process->pipe_read_buf = buf;
+        current_process->pipe_read_len = len;
+        RemoveProcessFromQueue(&ready_queue, current_process);
+        EnqueueProcess(&pipe->read_queue, current_process);
+        *blocked = 1;
+        return SUCCESS;
+    }
+
+    // copy requested amount or what's available
+    to_copy = (len < available) ? len : available;
+
+    // copy data from circular buffer
+    for (int i = 0; i < to_copy; i++) {
+        ((char *)buf)[i] = pipe->buffer[pipe->read_pos];
+        pipe->read_pos = (pipe->read_pos + 1) % PIPE_BUFFER_LEN;
+    }
+
+    // update filled count
+    pipe->filled -= to_copy;
+
+    // wake any blocked writers
+    pcb_t *writer = DequeueProcess(&pipe->write_queue);
+    if (writer != NULL && !writer->pipe_write_blocked) {
+        // put writer back on ready queue
+        EnqueueProcess(&ready_queue, writer);
+    } else if (writer != NULL) {
+        // try to complete partial write
+        int write_available = PIPE_BUFFER_LEN - pipe->filled;
+        if (write_available >= PIPE_BUFFER_LEN / 2) {
+            // enough space to continue write
+            int to_write = (writer->pipe_write_len < write_available) ?
+                          writer->pipe_write_len : write_available;
+
+            // copy data from writer's buffer
+            for (int i = 0; i < to_write; i++) {
+                pipe->buffer[pipe->write_pos] = ((char *)writer->pipe_write_buf)[i + writer->pipe_write_offset];
+                pipe->write_pos = (pipe->write_pos + 1) % PIPE_BUFFER_LEN;
+            }
+
+            // update pipe state
+            pipe->filled += to_write;
+            writer->pipe_write_offset += to_write;
+
+            // check if write complete
+            if (writer->pipe_write_offset >= writer->pipe_write_len) {
+                // write done, wake writer
+                writer->pipe_write_blocked = 0;
+                writer->user_context.regs[0] = writer->pipe_write_len;
+                EnqueueProcess(&ready_queue, writer);
+            } else {
+                // more to write, put back on queue
+                EnqueueProcess(&pipe->write_queue, writer);
+            }
+        } else {
+            // not enough space yet, requeue writer
+            EnqueueProcess(&pipe->write_queue, writer);
+        }
+    }
+
+    return to_copy;
+}
+
+// syscall: write to pipe
+static int KernelPipeWrite(int pipe_id, void *buf, int len, int *blocked)
+{
+    pipe_t *pipe;
+    int available;
+    int to_write;
+
+    // validate args
+    if (buf == NULL || len < 0 || blocked == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // find pipe
+    pipe = FindPipe(pipe_id);
+    if (pipe == NULL) {
+        return ERROR;
+    }
+
+    // check available space
+    available = PIPE_BUFFER_LEN - pipe->filled;
+
+    // if full and want to write, block writer
+    if (len > 0 && available == 0) {
+        current_process->pipe_write_blocked = 1;
+        current_process->pipe_write_id = pipe_id;
+        current_process->pipe_write_buf = buf;
+        current_process->pipe_write_len = len;
+        current_process->pipe_write_offset = 0;
+        RemoveProcessFromQueue(&ready_queue, current_process);
+        EnqueueProcess(&pipe->write_queue, current_process);
+        *blocked = 1;
+        return SUCCESS;
+    }
+
+    // write what fits
+    to_write = (len < available) ? len : available;
+
+    // copy to circular buffer
+    for (int i = 0; i < to_write; i++) {
+        pipe->buffer[pipe->write_pos] = ((char *)buf)[i];
+        pipe->write_pos = (pipe->write_pos + 1) % PIPE_BUFFER_LEN;
+    }
+
+    // update filled count
+    pipe->filled += to_write;
+
+    // wake blocked readers
+    pcb_t *reader = DequeueProcess(&pipe->read_queue);
+    if (reader != NULL) {
+        // give reader what's available
+        int available_data = pipe->filled;
+        int to_give = (reader->pipe_read_len < available_data) ?
+                     reader->pipe_read_len : available_data;
+
+        // copy data to reader
+        for (int i = 0; i < to_give; i++) {
+            ((char *)reader->pipe_read_buf)[i] = pipe->buffer[pipe->read_pos];
+            pipe->read_pos = (pipe->read_pos + 1) % PIPE_BUFFER_LEN;
+        }
+
+        // update pipe and wake reader
+        pipe->filled -= to_give;
+        reader->pipe_read_blocked = 0;
+        reader->user_context.regs[0] = to_give;
+        EnqueueProcess(&ready_queue, reader);
+    }
+
+    // if partial write, block for remainder
+    if (to_write < len) {
+        current_process->pipe_write_blocked = 1;
+        current_process->pipe_write_id = pipe_id;
+        current_process->pipe_write_buf = ((char *)buf) + to_write;
+        current_process->pipe_write_len = len - to_write;
+        current_process->pipe_write_offset = 0;
+        RemoveProcessFromQueue(&ready_queue, current_process);
+        EnqueueProcess(&pipe->write_queue, current_process);
+        *blocked = 1;
+        return SUCCESS;
+    }
+
+    return to_write;
+}
+
+// syscall: destroy pipe and wake all blocked processes
+static int KernelReclaim(int id)
+{
+    // find pipe
+    pipe_t *pipe = FindPipe(id);
+    if (pipe == NULL) {
+        return ERROR;
+    }
+
+    // wake all blocked readers with error
+    pcb_t *proc;
+    while ((proc = DequeueProcess(&pipe->read_queue)) != NULL) {
+        proc->pipe_read_blocked = 0;
+        proc->user_context.regs[0] = ERROR;
+        EnqueueProcess(&ready_queue, proc);
+    }
+
+    // wake all blocked writers with error
+    while ((proc = DequeueProcess(&pipe->write_queue)) != NULL) {
+        proc->pipe_write_blocked = 0;
+        proc->user_context.regs[0] = ERROR;
+        EnqueueProcess(&ready_queue, proc);
+    }
+
+    // mark pipe as invalid
+    pipe->valid = 0;
+    return SUCCESS;
+}
+
+// lock data structure
+typedef struct {
+    int id;
+    int valid;
+    int owner_pid;
+    int held;
+    process_queue_t wait_queue;
+} lock_t;
+
+// global lock table
+static lock_t locks[MAX_PIPES];
+// next lock id to assign
+static int next_lock_id = 0;
+
+// find lock by id
+static lock_t *FindLock(int lock_id)
+{
+    // search lock table for matching id
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (locks[i].valid && locks[i].id == lock_id) {
+            return &locks[i];
+        }
+    }
+    return NULL;
+}
+
+// allocate new lock from global table
+static int AllocLock(void)
+{
+    // find first free lock slot
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (!locks[i].valid) {
+            // mark as valid and initialize
+            locks[i].valid = 1;
+            locks[i].id = next_lock_id++;
+            locks[i].owner_pid = -1;
+            locks[i].held = 0;
+            InitProcessQueue(&locks[i].wait_queue);
+            return locks[i].id;
+        }
+    }
+    // table full
+    return ERROR;
+}
+
+// syscall: create new lock
+static int KernelLockInit(int *lock_idp)
+{
+    // validate args
+    if (lock_idp == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // allocate lock
+    int lock_id = AllocLock();
+    if (lock_id == ERROR) {
+        return ERROR;
+    }
+
+    // return id to userland
+    *lock_idp = lock_id;
+    return SUCCESS;
+}
+
+// syscall: acquire lock
+static int KernelAcquire(int lock_id, int *blocked)
+{
+    lock_t *lock;
+
+    // validate args
+    if (blocked == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // find lock
+    lock = FindLock(lock_id);
+    if (lock == NULL) {
+        return ERROR;
+    }
+
+    // if lock not held, acquire it
+    if (!lock->held) {
+        lock->held = 1;
+        lock->owner_pid = current_process->pid;
+        return SUCCESS;
+    }
+
+    // lock is held, block process
+    current_process->lock_blocked = 1;
+    current_process->lock_blocked_id = lock_id;
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    EnqueueProcess(&lock->wait_queue, current_process);
+    *blocked = 1;
+    return SUCCESS;
+}
+
+// syscall: release lock
+static int KernelRelease(int lock_id)
+{
+    lock_t *lock;
+    pcb_t *waiter;
+
+    // find lock
+    lock = FindLock(lock_id);
+    if (lock == NULL) {
+        return ERROR;
+    }
+
+    // check if current process owns lock
+    if (!lock->held || lock->owner_pid != current_process->pid) {
+        return ERROR;
+    }
+
+    // wake first waiter if any
+    waiter = DequeueProcess(&lock->wait_queue);
+    if (waiter != NULL) {
+        // give lock to waiter
+        lock->owner_pid = waiter->pid;
+        waiter->lock_blocked = 0;
+        EnqueueProcess(&ready_queue, waiter);
+    } else {
+        // no waiters, release lock
+        lock->held = 0;
+        lock->owner_pid = -1;
+    }
+
+    return SUCCESS;
+}
+
+// condition variable data structure
+typedef struct {
+    int id;
+    int valid;
+    process_queue_t wait_queue;
+} cvar_t;
+
+// global cvar table
+static cvar_t cvars[MAX_PIPES];
+// next cvar id to assign
+static int next_cvar_id = 0;
+
+// find cvar by id
+static cvar_t *FindCvar(int cvar_id)
+{
+    // search cvar table for matching id
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (cvars[i].valid && cvars[i].id == cvar_id) {
+            return &cvars[i];
+        }
+    }
+    return NULL;
+}
+
+// allocate new cvar from global table
+static int AllocCvar(void)
+{
+    // find first free cvar slot
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (!cvars[i].valid) {
+            // mark as valid and initialize
+            cvars[i].valid = 1;
+            cvars[i].id = next_cvar_id++;
+            InitProcessQueue(&cvars[i].wait_queue);
+            return cvars[i].id;
+        }
+    }
+    // table full
+    return ERROR;
+}
+
+// syscall: create new cvar
+static int KernelCvarInit(int *cvar_idp)
+{
+    // validate args
+    if (cvar_idp == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // allocate cvar
+    int cvar_id = AllocCvar();
+    if (cvar_id == ERROR) {
+        return ERROR;
+    }
+
+    // return id to userland
+    *cvar_idp = cvar_id;
+    return SUCCESS;
+}
+
+// syscall: wait on cvar
+static int KernelCvarWait(int cvar_id, int lock_id, int *blocked)
+{
+    cvar_t *cvar;
+    lock_t *lock;
+
+    // validate args
+    if (blocked == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // find cvar and lock
+    cvar = FindCvar(cvar_id);
+    lock = FindLock(lock_id);
+    if (cvar == NULL || lock == NULL) {
+        return ERROR;
+    }
+
+    // check if current process owns lock
+    if (!lock->held || lock->owner_pid != current_process->pid) {
+        return ERROR;
+    }
+
+    // save lock id for re-acquire on wake
+    current_process->cvar_wait_lock_id = lock_id;
+
+    // release the lock
+    lock->held = 0;
+    lock->owner_pid = -1;
+
+    // block on cvar
+    current_process->cvar_blocked = 1;
+    current_process->cvar_blocked_id = cvar_id;
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    EnqueueProcess(&cvar->wait_queue, current_process);
+    *blocked = 1;
+    return SUCCESS;
+}
+
+// syscall: signal cvar (wake one waiter)
+static int KernelCvarSignal(int cvar_id)
+{
+    cvar_t *cvar;
+    lock_t *lock;
+    pcb_t *waiter;
+    int lock_id;
+
+    // find cvar
+    cvar = FindCvar(cvar_id);
+    if (cvar == NULL) {
+        return ERROR;
+    }
+
+    // wake first waiter if any
+    waiter = DequeueProcess(&cvar->wait_queue);
+    if (waiter != NULL) {
+        // get the lock that waiter needs to re-acquire
+        lock_id = waiter->cvar_wait_lock_id;
+        lock = FindLock(lock_id);
+        if (lock == NULL) {
+            // lock was deleted, give error to waiter
+            waiter->cvar_blocked = 0;
+            waiter->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, waiter);
+            return SUCCESS;
+        }
+
+        // block waiter on lock acquisition
+        waiter->cvar_blocked = 0;
+        if (!lock->held) {
+            // lock is free, give it to waiter
+            lock->held = 1;
+            lock->owner_pid = waiter->pid;
+            EnqueueProcess(&ready_queue, waiter);
+        } else {
+            // lock is held, block waiter
+            waiter->lock_blocked = 1;
+            waiter->lock_blocked_id = lock_id;
+            EnqueueProcess(&lock->wait_queue, waiter);
+        }
+    }
+
+    return SUCCESS;
+}
+
+// syscall: broadcast cvar (wake all waiters)
+static int KernelCvarBroadcast(int cvar_id)
+{
+    cvar_t *cvar;
+    lock_t *lock;
+    pcb_t *waiter;
+    int lock_id;
+
+    // find cvar
+    cvar = FindCvar(cvar_id);
+    if (cvar == NULL) {
+        return ERROR;
+    }
+
+    // wake all waiters
+    while ((waiter = DequeueProcess(&cvar->wait_queue)) != NULL) {
+        // get the lock that waiter needs to re-acquire
+        lock_id = waiter->cvar_wait_lock_id;
+        lock = FindLock(lock_id);
+        if (lock == NULL) {
+            // lock was deleted, give error to waiter
+            waiter->cvar_blocked = 0;
+            waiter->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, waiter);
+            continue;
+        }
+
+        // block waiter on lock acquisition
+        waiter->cvar_blocked = 0;
+        if (!lock->held) {
+            // lock is free, give it to waiter
+            lock->held = 1;
+            lock->owner_pid = waiter->pid;
+            EnqueueProcess(&ready_queue, waiter);
+        } else {
+            // lock is held, block waiter
+            waiter->lock_blocked = 1;
+            waiter->lock_blocked_id = lock_id;
+            EnqueueProcess(&lock->wait_queue, waiter);
+        }
+    }
+
+    return SUCCESS;
+}
+
 int DispatchSyscall(UserContext *uctxt, int current_tick)
 {
     int blocked = 0;
@@ -414,6 +1074,58 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
                                          (void *)uctxt->regs[1],
                                          (int)uctxt->regs[2],
                                          &blocked);
+        break;
+
+    case YALNIX_PIPE_INIT:
+        uctxt->regs[0] = KernelPipeInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_PIPE_READ:
+        uctxt->regs[0] = KernelPipeRead((int)uctxt->regs[0],
+                                        (void *)uctxt->regs[1],
+                                        (int)uctxt->regs[2],
+                                        &blocked);
+        break;
+
+    case YALNIX_PIPE_WRITE:
+        uctxt->regs[0] = KernelPipeWrite((int)uctxt->regs[0],
+                                         (void *)uctxt->regs[1],
+                                         (int)uctxt->regs[2],
+                                         &blocked);
+        break;
+
+    case YALNIX_RECLAIM:
+        uctxt->regs[0] = KernelReclaim((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_LOCK_INIT:
+        uctxt->regs[0] = KernelLockInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_LOCK_ACQUIRE:
+        uctxt->regs[0] = KernelAcquire((int)uctxt->regs[0], &blocked);
+        break;
+
+    case YALNIX_LOCK_RELEASE:
+        uctxt->regs[0] = KernelRelease((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_INIT:
+        uctxt->regs[0] = KernelCvarInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_WAIT:
+        uctxt->regs[0] = KernelCvarWait((int)uctxt->regs[0],
+                                        (int)uctxt->regs[1],
+                                        &blocked);
+        break;
+
+    case YALNIX_CVAR_SIGNAL:
+        uctxt->regs[0] = KernelCvarSignal((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_BROADCAST:
+        uctxt->regs[0] = KernelCvarBroadcast((int)uctxt->regs[0]);
         break;
 
     default:

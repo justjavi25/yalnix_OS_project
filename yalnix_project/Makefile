@@ -11,7 +11,7 @@
 # Where's your kernel source?
 K_SRC_DIR = kernel
 
-# What are the kernel c and include files? 
+# What are the kernel c and include files?
 K_SRCS = kernelstart.c memory.c process.c queue.c syscalls.c trap.c tty.c
 K_INCS = memory.h process.h syscalls.h trap.h tty.h
 
@@ -19,7 +19,7 @@ K_INCS = memory.h process.h syscalls.h trap.h tty.h
 U_SRC_DIR = .
 
 # What are the user c and include files?
-U_SRCS = init.c test/cp3_getpid.c test/cp3_delay.c test/cp3_brk.c test/cp4_fork.c test/cp4_exec.c test/cp4_wait.c test/cp4_fork_multi.c test/cp4_fork_exec.c test/cp5_tty_write.c test/cp5_tty_read.c
+U_SRCS = init.c test/cp3_getpid.c test/cp3_delay.c test/cp3_brk.c test/cp4_fork.c test/cp4_exec.c test/cp4_wait.c test/cp4_fork_multi.c test/cp4_fork_exec.c test/cp5_tty_write.c test/cp5_tty_read.c test/cp6_pipe_simple.c test/cp6_lock_simple.c test/cp6_cvar_simple.c
 U_INCS =  
 
 
