@@ -9,7 +9,7 @@ int DispatchSyscall(UserContext *uctxt, int current_tick);
 // terminate the current process with the supplied status.
 void KernelExitProcess(int status);
 
-// initialize pipe system.
+// initialize CP6 pipes, locks, and condition variables.
 void InitPipeSystem(void);
 
 #endif

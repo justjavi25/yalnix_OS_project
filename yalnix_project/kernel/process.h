@@ -81,36 +81,26 @@ typedef struct pcb {
     void *tty_read_buf;
     int tty_read_len;
 
-    //nonzero if blocked on pipe read.
+    // PipeRead state saved while the process waits for a writer.
     int pipe_read_blocked;
-
-    //pipe read bookkeeping.
     int pipe_read_id;
     void *pipe_read_buf;
     int pipe_read_len;
 
-    //nonzero if blocked on pipe write.
+    // PipeWrite state saved while the process waits for buffer space.
     int pipe_write_blocked;
-
-    //pipe write bookkeeping.
     int pipe_write_id;
     void *pipe_write_buf;
     int pipe_write_len;
     int pipe_write_offset;
 
-    //nonzero if blocked on lock acquire.
+    // Lock handle currently blocking Acquire, if any.
     int lock_blocked;
-
-    //lock id being blocked on.
     int lock_blocked_id;
 
-    //nonzero if blocked on cvar wait.
+    // Condition-variable wait state; the lock handle is reacquired on wakeup.
     int cvar_blocked;
-
-    //cvar id being blocked on.
     int cvar_blocked_id;
-
-    //lock id to re-acquire after cvar signal.
     int cvar_wait_lock_id;
 } pcb_t;
 

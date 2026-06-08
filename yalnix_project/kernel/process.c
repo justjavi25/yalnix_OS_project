@@ -682,8 +682,8 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
     //copy the parent's saved user context as the starting point.
     memcpy(&child->user_context, &parent_proc->user_context, sizeof(UserContext));
 
-    //debug: verify the child's user context was copied correctly.
-    TracePrintf(0, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
+    // Useful when diagnosing fork context copies.
+    TracePrintf(1, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
                 parent_proc->user_context.pc, child->user_context.pc);
 
     //copy each valid Region 1 page into a private child frame.

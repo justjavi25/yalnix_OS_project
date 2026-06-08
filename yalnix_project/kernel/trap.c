@@ -25,15 +25,13 @@ static void WakeDelayedProcesses(void)
 
     while (node != NULL) {
         pcb_t *proc = node->process;
-        // wake if delayed timeout reached and not blocked on anything else
+        // Delay expiry only makes the process runnable if no other syscall is blocking it.
         if (proc != NULL && proc->delayed && proc->wake_tick <= clock_ticks &&
             !proc->is_zombie && !proc->wait_blocked &&
             !proc->tty_read_blocked && !proc->tty_write_blocked &&
             !proc->pipe_read_blocked && !proc->pipe_write_blocked &&
             !proc->lock_blocked && !proc->cvar_blocked) {
-            // mark no longer delayed
             proc->delayed = 0;
-            // add to ready queue if not already there
             if (proc != current_process &&
                 !IsProcessInQueue(&ready_queue, proc)) {
                 EnqueueProcess(&ready_queue, proc);
@@ -53,6 +51,7 @@ static int IsRunnable(pcb_t *proc)
         return 1;
     }
 
+    // A process may sit in ready_queue only after all of its blocking conditions clear.
     return !proc->delayed && !proc->wait_blocked &&
            !proc->tty_read_blocked && !proc->tty_write_blocked &&
            !proc->pipe_read_blocked && !proc->pipe_write_blocked &&

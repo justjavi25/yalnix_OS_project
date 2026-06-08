@@ -26,9 +26,8 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 
     //initialize process globals before creating the idle process.
     InitProcessSystem();
-    // initialize TTY system for terminal I/O.
     InitTtySystem();
-    // initialize pipe system for IPC.
+    // CP6 objects share one initialization routine for pipes, locks, and cvars.
     InitPipeSystem();
 
     //fill the trap vector with handlers.

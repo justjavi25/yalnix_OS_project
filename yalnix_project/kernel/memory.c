@@ -71,7 +71,7 @@ static void ClearPte(pte_t *pte)
     pte->pfn = 0; // Clear the physical frame number
 }
 
-//purpose: Initialize our free-fram tracking given the total physical memory size in bytes
+// Initialize free-frame tracking from the physical memory size.
 void InitPhysicalMemory(unsigned int pmem_size)
 {
     //Convert the physical memory byte count into page frame count
@@ -124,7 +124,7 @@ int AllocFrame(void)
     return ERROR;
 }
 
-//Purpose: Mark a physical frame as reusable
+// Mark a physical frame as reusable.
 void FreeFrame(int pfn)
 {
     // Ignore invalid physical frame numbers.
@@ -185,7 +185,7 @@ pte_t *BuildRegion0PageTable(void){
     return pt;
 }
 
-// Purpose: allocate and initialize a region 1 page table
+// Allocate and initialize a Region 1 page table.
 // Checkpoint 2: Idle's region 1 only needs a user stack page
 pte_t *CreateRegion1PageTable(void){
     // Allocate the Region 1 page table from the kernel heap.
