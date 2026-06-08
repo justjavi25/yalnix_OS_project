@@ -81,7 +81,7 @@ typedef struct pcb {
     void *tty_read_buf;
     int tty_read_len;
 
-    //nonzero if blocked on a pipe read/write.
+    // Pipe state saved while PipeRead/PipeWrite is asleep.
     int pipe_read_blocked;
     int pipe_write_blocked;
     int pipe_id;
@@ -91,7 +91,7 @@ typedef struct pcb {
     int pipe_write_len;
     int pipe_write_offset;
 
-    //nonzero if blocked on a lock or condition variable.
+    // Lock/cvar state saved while Acquire or CvarWait is asleep.
     int lock_blocked;
     int cvar_blocked;
     int waiting_lock_id;

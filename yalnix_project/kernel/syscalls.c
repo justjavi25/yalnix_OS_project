@@ -120,9 +120,14 @@ static int KernelDelay(int clock_ticks, int current_tick)
 typedef struct pipe_state {
     int id;
     int valid;
+
+    /* FIFO pipe contents.  head points at the next byte to read; len is the
+     * number of live bytes currently buffered. */
     char buf[PIPE_BUFFER_LEN];
     int head;
     int len;
+
+    /* Processes sleep here when a read has no bytes or a write has no space. */
     process_queue_t readers;
     process_queue_t writers;
     struct pipe_state *next;
@@ -131,6 +136,8 @@ typedef struct pipe_state {
 typedef struct lock_state {
     int id;
     int valid;
+
+    /* NULL owner means the lock is free. */
     pcb_t *owner;
     process_queue_t waiters;
     struct lock_state *next;
@@ -139,10 +146,15 @@ typedef struct lock_state {
 typedef struct cvar_state {
     int id;
     int valid;
+
+    /* Waiters have dropped their lock and must reacquire it before returning. */
     process_queue_t waiters;
     struct cvar_state *next;
 } cvar_state_t;
 
+/* CP6 objects are kernel-owned linked lists.  User code only gets integer
+ * handles, so resources can outlive forks and remain independent of a single
+ * process address space. */
 static int next_resource_id = 1;
 static pipe_state_t *pipes = NULL;
 static lock_state_t *locks = NULL;
@@ -170,6 +182,9 @@ static void CopyToProcess(pcb_t *proc, void *dst, void *src, int len)
         ? 0
         : (unsigned int)current_process->region1_pt;
 
+    /* Some wakeups complete another process's blocked syscall.  Temporarily
+     * install that process's Region 1 page table before copying to its user
+     * buffer, then restore the caller's mapping. */
     WriteRegister(REG_PTBR1, (unsigned int)proc->region1_pt);
     WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
     memcpy(dst, src, len);
@@ -232,6 +247,8 @@ static cvar_state_t *FindCvar(int id)
 
 static void ReadyProcess(pcb_t *proc)
 {
+    /* Wakeup helpers may run while proc is the current process, already queued,
+     * or already dead.  Only put genuinely runnable processes on ready_queue. */
     if (proc != NULL && proc != current_process &&
         proc != idle_process && !proc->is_zombie &&
         !IsProcessInQueue(&ready_queue, proc)) {
@@ -252,6 +269,8 @@ static void WakeLockWaiter(lock_state_t *lock)
         return;
     }
 
+    /* Release transfers ownership directly to the oldest waiter; the waiter
+     * returns from Acquire with SUCCESS when it next runs. */
     lock->owner = waiter;
     waiter->lock_blocked = 0;
     waiter->waiting_lock_id = 0;
@@ -282,6 +301,8 @@ static void GrantLockOrBlock(pcb_t *proc, int lock_id)
         return;
     }
 
+    /* Used by cvar wakeups.  The process is done waiting on the cvar, but it
+     * cannot return to user mode until it owns the associated lock again. */
     if (lock->owner == NULL) {
         lock->owner = proc;
         proc->cvar_blocked = 0;
@@ -315,6 +336,8 @@ static int PipeReadBytes(pipe_state_t *pipe, pcb_t *reader)
         count = PIPE_BUFFER_LEN;
     }
 
+    /* Copy through a small kernel buffer so we can safely switch Region 1 only
+     * for the final user-buffer copy. */
     for (int i = 0; i < count; i++) {
         tmp[i] = pipe->buf[pipe->head];
         pipe->head = (pipe->head + 1) % PIPE_BUFFER_LEN;
@@ -338,6 +361,8 @@ static int PipeWriteBytes(pipe_state_t *pipe, pcb_t *writer)
         return 0;
     }
 
+    /* Continue a possibly partial PipeWrite until either it is complete or the
+     * pipe fills. */
     while (writer->pipe_write_offset < writer->pipe_write_len &&
            pipe->len < PIPE_BUFFER_LEN) {
         int tail = (pipe->head + pipe->len) % PIPE_BUFFER_LEN;
@@ -364,6 +389,8 @@ static void ServicePipe(pipe_state_t *pipe)
 {
     int progressed = 1;
 
+    /* Moving one side of a pipe can unblock the other side, which can then make
+     * more room/data.  Keep draining this little chain reaction until it stalls. */
     while (pipe != NULL && progressed) {
         progressed = 0;
 
@@ -390,6 +417,7 @@ static int KernelPipeInit(int *pipe_idp)
 {
     pipe_state_t *pipe;
 
+    /* Validate the output pointer before allocating a pipe handle. */
     if (CopyIntToUser(pipe_idp, 0) == ERROR) {
         return ERROR;
     }
@@ -424,6 +452,7 @@ static int KernelPipeRead(int pipe_id, void *buf, int len, int *blocked)
         return ERROR;
     }
 
+    /* Store enough state for a later writer to complete this read if we block. */
     current_process->pipe_read_blocked = 1;
     current_process->pipe_id = pipe_id;
     current_process->pipe_read_buf = buf;
@@ -460,6 +489,8 @@ static int KernelPipeWrite(int pipe_id, void *buf, int len, int *blocked)
         return ERROR;
     }
 
+    /* Writers may sleep after the caller's Region 1 is gone, so keep a Region 0
+     * copy of the bytes until the full write finishes. */
     kernel_buf = (char *)malloc(len);
     if (kernel_buf == NULL) {
         return ERROR;
@@ -522,6 +553,7 @@ static int KernelAcquire(int lock_id, int *blocked)
         return SUCCESS;
     }
 
+    /* FIFO waiters are woken by ReleaseLockInternal. */
     current_process->lock_blocked = 1;
     current_process->waiting_lock_id = lock_id;
     RemoveProcessFromQueue(&ready_queue, current_process);
@@ -575,6 +607,8 @@ static int KernelCvarWait(int cvar_id, int lock_id, int *blocked)
         return ERROR;
     }
 
+    /* Mesa-style cvar wait: drop the lock, sleep on the cvar, then the signal
+     * path reacquires the lock before this syscall returns. */
     current_process->cvar_blocked = 1;
     current_process->waiting_cvar_id = cvar_id;
     current_process->cvar_wait_lock_id = lock_id;
@@ -594,6 +628,7 @@ static int KernelCvarSignal(int cvar_id)
         return ERROR;
     }
 
+    /* A signal is not remembered if nobody is waiting. */
     waiter = DequeueProcess(&cvar->waiters);
     if (waiter != NULL) {
         waiter->waiting_cvar_id = 0;
@@ -622,6 +657,7 @@ static void WakeQueueWithError(process_queue_t *queue)
 {
     pcb_t *proc;
 
+    /* Reclaim uses this to force blocked syscalls to return ERROR. */
     while ((proc = DequeueProcess(queue)) != NULL) {
         proc->pipe_read_blocked = 0;
         proc->pipe_write_blocked = 0;
@@ -642,6 +678,8 @@ static int KernelReclaim(int id)
     lock_state_t *lock = locks;
     cvar_state_t *cvar = cvars;
 
+    /* Handles share one namespace, so search each object list and invalidate the
+     * matching resource.  Blocked callers are woken with ERROR. */
     while (pipe != NULL) {
         if (pipe->valid && pipe->id == id) {
             pipe->valid = 0;
@@ -678,6 +716,8 @@ static void CleanupProcessResources(pcb_t *proc)
 {
     lock_state_t *lock = locks;
 
+    /* If a process dies while holding a lock, hand it to the next waiter.  If it
+     * was only waiting somewhere, remove the stale queue entry. */
     while (lock != NULL) {
         if (lock->valid) {
             RemoveProcessFromQueue(&lock->waiters, proc);
@@ -812,7 +852,6 @@ static int KernelFork(void)
         return 0;
     }
 
-    //debug: check child's PC after KCCopy and PCB addresses.
     TracePrintf(1, "KernelFork: parent PCB=%p, child PCB=%p, parent user_context=%p, child user_context=%p\n",
                 current_process, child, &current_process->user_context, &child->user_context);
     TracePrintf(1, "KernelFork: after KCCopy, child PC=%p\n", child->user_context.pc);
@@ -821,7 +860,6 @@ static int KernelFork(void)
     //we set this up now, but it will be restored when the child runs.
     child->user_context.regs[0] = 0;
 
-    //debug: check child's PC after setting regs[0].
     TracePrintf(1, "KernelFork: after regs[0]=0, child PC=%p\n", child->user_context.pc);
 
     //add the child to the ready queue so it can be scheduled.

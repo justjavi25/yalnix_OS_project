@@ -49,6 +49,9 @@ static int IsRunnable(pcb_t *proc)
         return 1;
     }
 
+    /* CP6 calls block by setting PCB flags and moving the process onto an
+     * object-specific wait queue.  The scheduler must see all of those flags
+     * clear before returning the process to user mode. */
     return !proc->delayed && !proc->wait_blocked &&
            !proc->tty_read_blocked && !proc->tty_write_blocked &&
            !proc->pipe_read_blocked && !proc->pipe_write_blocked &&
@@ -283,6 +286,8 @@ void HandleTrapMemory(UserContext *uctxt)
     addr = (unsigned int)uctxt->addr;
     if (addr >= VMEM_1_BASE && addr < VMEM_1_LIMIT) {
       fault_page = (addr - VMEM_1_BASE) >> PAGESHIFT;
+      /* Treat faults just below the current stack mapping as stack growth, but
+       * do not let the stack cross the heap/red-zone boundary. */
       if (fault_page < current_process->stack_base_page &&
           fault_page > current_process->brk_page) {
         for (int vpn = current_process->stack_base_page - 1;
