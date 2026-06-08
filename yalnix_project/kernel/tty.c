@@ -1,4 +1,5 @@
 #include "tty.h"
+#include "memory.h"
 #include "process.h"
 #include <hardware.h>
 #include <yalnix.h>
@@ -22,42 +23,6 @@ typedef struct tty_line {
 } tty_line_t;
 
 static tty_state_t ttys[NUM_TERMINALS];
-
-static int UserBufferValidFor(pcb_t *proc, void *buf, int len, int prot)
-{
-    unsigned int start;
-    unsigned int end;
-    int first_page;
-    int last_page;
-
-    if (len < 0 || (len > 0 && buf == NULL)) {
-        return 0;
-    }
-
-    if (len == 0) {
-        return 1;
-    }
-
-    start = (unsigned int)buf;
-    end = start + len - 1;
-
-    if (end < start || start < VMEM_1_BASE || end >= VMEM_1_LIMIT ||
-        proc == NULL || proc->region1_pt == NULL) {
-        return 0;
-    }
-
-    first_page = (start - VMEM_1_BASE) >> PAGESHIFT;
-    last_page = (end - VMEM_1_BASE) >> PAGESHIFT;
-
-    for (int vpn = first_page; vpn <= last_page; vpn++) {
-        if (!proc->region1_pt[vpn].valid ||
-            ((proc->region1_pt[vpn].prot & prot) != prot)) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
 
 static int UserBufferReadable(void *buf, int len)
 {
@@ -339,7 +304,7 @@ void HandleTtyReceive(int tty_id)
         return;
     }
 
-    TracePrintf(0, "HandleTtyReceive: tty %d received %d bytes\n", tty_id, len);
+    TracePrintf(1, "HandleTtyReceive: tty %d received %d bytes\n", tty_id, len);
     EnqueueLine(tty_id, buf, len);
     ServiceReaders(tty_id);
 }

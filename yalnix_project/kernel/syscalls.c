@@ -117,6 +117,588 @@ static int KernelDelay(int clock_ticks, int current_tick)
     return SUCCESS;
 }
 
+typedef struct pipe_state {
+    int id;
+    int valid;
+    char buf[PIPE_BUFFER_LEN];
+    int head;
+    int len;
+    process_queue_t readers;
+    process_queue_t writers;
+    struct pipe_state *next;
+} pipe_state_t;
+
+typedef struct lock_state {
+    int id;
+    int valid;
+    pcb_t *owner;
+    process_queue_t waiters;
+    struct lock_state *next;
+} lock_state_t;
+
+typedef struct cvar_state {
+    int id;
+    int valid;
+    process_queue_t waiters;
+    struct cvar_state *next;
+} cvar_state_t;
+
+static int next_resource_id = 1;
+static pipe_state_t *pipes = NULL;
+static lock_state_t *locks = NULL;
+static cvar_state_t *cvars = NULL;
+
+static int UserReadable(void *buf, int len)
+{
+    return UserBufferValidFor(current_process, buf, len, PROT_READ);
+}
+
+static int UserWritable(void *buf, int len)
+{
+    return UserBufferValidFor(current_process, buf, len, PROT_WRITE);
+}
+
+static void CopyToProcess(pcb_t *proc, void *dst, void *src, int len)
+{
+    unsigned int saved_ptbr1;
+
+    if (proc == NULL || len <= 0) {
+        return;
+    }
+
+    saved_ptbr1 = (current_process == NULL || current_process->region1_pt == NULL)
+        ? 0
+        : (unsigned int)current_process->region1_pt;
+
+    WriteRegister(REG_PTBR1, (unsigned int)proc->region1_pt);
+    WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
+    memcpy(dst, src, len);
+
+    if (saved_ptbr1 != 0) {
+        WriteRegister(REG_PTBR1, saved_ptbr1);
+        WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
+    }
+}
+
+static int CopyIntToUser(int *dst, int value)
+{
+    if (!UserWritable(dst, sizeof(int))) {
+        return ERROR;
+    }
+    *dst = value;
+    return SUCCESS;
+}
+
+static int AllocResourceId(void)
+{
+    return next_resource_id++;
+}
+
+static pipe_state_t *FindPipe(int id)
+{
+    pipe_state_t *pipe = pipes;
+    while (pipe != NULL) {
+        if (pipe->valid && pipe->id == id) {
+            return pipe;
+        }
+        pipe = pipe->next;
+    }
+    return NULL;
+}
+
+static lock_state_t *FindLock(int id)
+{
+    lock_state_t *lock = locks;
+    while (lock != NULL) {
+        if (lock->valid && lock->id == id) {
+            return lock;
+        }
+        lock = lock->next;
+    }
+    return NULL;
+}
+
+static cvar_state_t *FindCvar(int id)
+{
+    cvar_state_t *cvar = cvars;
+    while (cvar != NULL) {
+        if (cvar->valid && cvar->id == id) {
+            return cvar;
+        }
+        cvar = cvar->next;
+    }
+    return NULL;
+}
+
+static void ReadyProcess(pcb_t *proc)
+{
+    if (proc != NULL && proc != current_process &&
+        proc != idle_process && !proc->is_zombie &&
+        !IsProcessInQueue(&ready_queue, proc)) {
+        EnqueueProcess(&ready_queue, proc);
+    }
+}
+
+static void WakeLockWaiter(lock_state_t *lock)
+{
+    pcb_t *waiter;
+
+    if (lock == NULL || lock->owner != NULL) {
+        return;
+    }
+
+    waiter = DequeueProcess(&lock->waiters);
+    if (waiter == NULL) {
+        return;
+    }
+
+    lock->owner = waiter;
+    waiter->lock_blocked = 0;
+    waiter->waiting_lock_id = 0;
+    waiter->user_context.regs[0] = SUCCESS;
+    ReadyProcess(waiter);
+}
+
+static void ReleaseLockInternal(lock_state_t *lock)
+{
+    if (lock == NULL) {
+        return;
+    }
+    lock->owner = NULL;
+    WakeLockWaiter(lock);
+}
+
+static void GrantLockOrBlock(pcb_t *proc, int lock_id)
+{
+    lock_state_t *lock = FindLock(lock_id);
+
+    if (proc == NULL || lock == NULL) {
+        if (proc != NULL) {
+            proc->cvar_blocked = 0;
+            proc->lock_blocked = 0;
+            proc->user_context.regs[0] = ERROR;
+            ReadyProcess(proc);
+        }
+        return;
+    }
+
+    if (lock->owner == NULL) {
+        lock->owner = proc;
+        proc->cvar_blocked = 0;
+        proc->lock_blocked = 0;
+        proc->waiting_lock_id = 0;
+        proc->user_context.regs[0] = SUCCESS;
+        ReadyProcess(proc);
+        return;
+    }
+
+    proc->cvar_blocked = 0;
+    proc->lock_blocked = 1;
+    proc->waiting_lock_id = lock_id;
+    EnqueueProcess(&lock->waiters, proc);
+}
+
+static int PipeReadBytes(pipe_state_t *pipe, pcb_t *reader)
+{
+    int count;
+    char tmp[PIPE_BUFFER_LEN];
+
+    if (pipe == NULL || reader == NULL || pipe->len <= 0) {
+        return 0;
+    }
+
+    count = reader->pipe_read_len;
+    if (count > pipe->len) {
+        count = pipe->len;
+    }
+    if (count > PIPE_BUFFER_LEN) {
+        count = PIPE_BUFFER_LEN;
+    }
+
+    for (int i = 0; i < count; i++) {
+        tmp[i] = pipe->buf[pipe->head];
+        pipe->head = (pipe->head + 1) % PIPE_BUFFER_LEN;
+        pipe->len--;
+    }
+
+    CopyToProcess(reader, reader->pipe_read_buf, tmp, count);
+    reader->pipe_read_blocked = 0;
+    reader->pipe_read_buf = NULL;
+    reader->pipe_read_len = 0;
+    reader->user_context.regs[0] = count;
+    ReadyProcess(reader);
+    return count;
+}
+
+static int PipeWriteBytes(pipe_state_t *pipe, pcb_t *writer)
+{
+    int written = 0;
+
+    if (pipe == NULL || writer == NULL) {
+        return 0;
+    }
+
+    while (writer->pipe_write_offset < writer->pipe_write_len &&
+           pipe->len < PIPE_BUFFER_LEN) {
+        int tail = (pipe->head + pipe->len) % PIPE_BUFFER_LEN;
+        pipe->buf[tail] = writer->pipe_write_buf[writer->pipe_write_offset++];
+        pipe->len++;
+        written++;
+    }
+
+    if (writer->pipe_write_offset >= writer->pipe_write_len) {
+        writer->pipe_write_blocked = 0;
+        writer->pipe_id = 0;
+        writer->user_context.regs[0] = writer->pipe_write_len;
+        free(writer->pipe_write_buf);
+        writer->pipe_write_buf = NULL;
+        writer->pipe_write_len = 0;
+        writer->pipe_write_offset = 0;
+        ReadyProcess(writer);
+    }
+
+    return written;
+}
+
+static void ServicePipe(pipe_state_t *pipe)
+{
+    int progressed = 1;
+
+    while (pipe != NULL && progressed) {
+        progressed = 0;
+
+        while (pipe->len > 0 && PeekProcess(&pipe->readers) != NULL) {
+            pcb_t *reader = DequeueProcess(&pipe->readers);
+            progressed += PipeReadBytes(pipe, reader);
+        }
+
+        while (pipe->len < PIPE_BUFFER_LEN && PeekProcess(&pipe->writers) != NULL) {
+            pcb_t *writer = PeekProcess(&pipe->writers);
+            int wrote = PipeWriteBytes(pipe, writer);
+            progressed += wrote;
+            if (!writer->pipe_write_blocked) {
+                DequeueProcess(&pipe->writers);
+            }
+            if (wrote == 0) {
+                break;
+            }
+        }
+    }
+}
+
+static int KernelPipeInit(int *pipe_idp)
+{
+    pipe_state_t *pipe;
+
+    if (CopyIntToUser(pipe_idp, 0) == ERROR) {
+        return ERROR;
+    }
+
+    pipe = (pipe_state_t *)malloc(sizeof(pipe_state_t));
+    if (pipe == NULL) {
+        return ERROR;
+    }
+
+    memset(pipe, 0, sizeof(pipe_state_t));
+    pipe->id = AllocResourceId();
+    pipe->valid = 1;
+    InitProcessQueue(&pipe->readers);
+    InitProcessQueue(&pipe->writers);
+    pipe->next = pipes;
+    pipes = pipe;
+    *pipe_idp = pipe->id;
+    return SUCCESS;
+}
+
+static int KernelPipeRead(int pipe_id, void *buf, int len, int *blocked)
+{
+    pipe_state_t *pipe = FindPipe(pipe_id);
+
+    if (pipe == NULL || len < 0 || blocked == NULL) {
+        return ERROR;
+    }
+    if (len == 0) {
+        return 0;
+    }
+    if (!UserWritable(buf, len)) {
+        return ERROR;
+    }
+
+    current_process->pipe_read_blocked = 1;
+    current_process->pipe_id = pipe_id;
+    current_process->pipe_read_buf = buf;
+    current_process->pipe_read_len = len;
+
+    if (pipe->len > 0) {
+        PipeReadBytes(pipe, current_process);
+        ServicePipe(pipe);
+        return current_process->user_context.regs[0];
+    }
+
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    EnqueueProcess(&pipe->readers, current_process);
+    ServicePipe(pipe);
+    if (current_process->pipe_read_blocked) {
+        *blocked = 1;
+        return SUCCESS;
+    }
+    return current_process->user_context.regs[0];
+}
+
+static int KernelPipeWrite(int pipe_id, void *buf, int len, int *blocked)
+{
+    pipe_state_t *pipe = FindPipe(pipe_id);
+    char *kernel_buf;
+
+    if (pipe == NULL || len < 0 || blocked == NULL) {
+        return ERROR;
+    }
+    if (len == 0) {
+        return 0;
+    }
+    if (!UserReadable(buf, len)) {
+        return ERROR;
+    }
+
+    kernel_buf = (char *)malloc(len);
+    if (kernel_buf == NULL) {
+        return ERROR;
+    }
+    memcpy(kernel_buf, buf, len);
+
+    current_process->pipe_write_blocked = 1;
+    current_process->pipe_id = pipe_id;
+    current_process->pipe_write_buf = kernel_buf;
+    current_process->pipe_write_len = len;
+    current_process->pipe_write_offset = 0;
+
+    PipeWriteBytes(pipe, current_process);
+    ServicePipe(pipe);
+    if (current_process->pipe_write_blocked) {
+        RemoveProcessFromQueue(&ready_queue, current_process);
+        EnqueueProcess(&pipe->writers, current_process);
+        ServicePipe(pipe);
+    }
+    if (current_process->pipe_write_blocked) {
+        *blocked = 1;
+        return SUCCESS;
+    }
+    return len;
+}
+
+static int KernelLockInit(int *lock_idp)
+{
+    lock_state_t *lock;
+
+    if (CopyIntToUser(lock_idp, 0) == ERROR) {
+        return ERROR;
+    }
+
+    lock = (lock_state_t *)malloc(sizeof(lock_state_t));
+    if (lock == NULL) {
+        return ERROR;
+    }
+
+    memset(lock, 0, sizeof(lock_state_t));
+    lock->id = AllocResourceId();
+    lock->valid = 1;
+    InitProcessQueue(&lock->waiters);
+    lock->next = locks;
+    locks = lock;
+    *lock_idp = lock->id;
+    return SUCCESS;
+}
+
+static int KernelAcquire(int lock_id, int *blocked)
+{
+    lock_state_t *lock = FindLock(lock_id);
+
+    if (lock == NULL || blocked == NULL || lock->owner == current_process) {
+        return ERROR;
+    }
+
+    if (lock->owner == NULL) {
+        lock->owner = current_process;
+        return SUCCESS;
+    }
+
+    current_process->lock_blocked = 1;
+    current_process->waiting_lock_id = lock_id;
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    EnqueueProcess(&lock->waiters, current_process);
+    *blocked = 1;
+    return SUCCESS;
+}
+
+static int KernelRelease(int lock_id)
+{
+    lock_state_t *lock = FindLock(lock_id);
+
+    if (lock == NULL || lock->owner != current_process) {
+        return ERROR;
+    }
+
+    ReleaseLockInternal(lock);
+    return SUCCESS;
+}
+
+static int KernelCvarInit(int *cvar_idp)
+{
+    cvar_state_t *cvar;
+
+    if (CopyIntToUser(cvar_idp, 0) == ERROR) {
+        return ERROR;
+    }
+
+    cvar = (cvar_state_t *)malloc(sizeof(cvar_state_t));
+    if (cvar == NULL) {
+        return ERROR;
+    }
+
+    memset(cvar, 0, sizeof(cvar_state_t));
+    cvar->id = AllocResourceId();
+    cvar->valid = 1;
+    InitProcessQueue(&cvar->waiters);
+    cvar->next = cvars;
+    cvars = cvar;
+    *cvar_idp = cvar->id;
+    return SUCCESS;
+}
+
+static int KernelCvarWait(int cvar_id, int lock_id, int *blocked)
+{
+    cvar_state_t *cvar = FindCvar(cvar_id);
+    lock_state_t *lock = FindLock(lock_id);
+
+    if (cvar == NULL || lock == NULL || blocked == NULL ||
+        lock->owner != current_process) {
+        return ERROR;
+    }
+
+    current_process->cvar_blocked = 1;
+    current_process->waiting_cvar_id = cvar_id;
+    current_process->cvar_wait_lock_id = lock_id;
+    RemoveProcessFromQueue(&ready_queue, current_process);
+    EnqueueProcess(&cvar->waiters, current_process);
+    ReleaseLockInternal(lock);
+    *blocked = 1;
+    return SUCCESS;
+}
+
+static int KernelCvarSignal(int cvar_id)
+{
+    cvar_state_t *cvar = FindCvar(cvar_id);
+    pcb_t *waiter;
+
+    if (cvar == NULL) {
+        return ERROR;
+    }
+
+    waiter = DequeueProcess(&cvar->waiters);
+    if (waiter != NULL) {
+        waiter->waiting_cvar_id = 0;
+        GrantLockOrBlock(waiter, waiter->cvar_wait_lock_id);
+    }
+    return SUCCESS;
+}
+
+static int KernelCvarBroadcast(int cvar_id)
+{
+    cvar_state_t *cvar = FindCvar(cvar_id);
+    pcb_t *waiter;
+
+    if (cvar == NULL) {
+        return ERROR;
+    }
+
+    while ((waiter = DequeueProcess(&cvar->waiters)) != NULL) {
+        waiter->waiting_cvar_id = 0;
+        GrantLockOrBlock(waiter, waiter->cvar_wait_lock_id);
+    }
+    return SUCCESS;
+}
+
+static void WakeQueueWithError(process_queue_t *queue)
+{
+    pcb_t *proc;
+
+    while ((proc = DequeueProcess(queue)) != NULL) {
+        proc->pipe_read_blocked = 0;
+        proc->pipe_write_blocked = 0;
+        proc->lock_blocked = 0;
+        proc->cvar_blocked = 0;
+        proc->user_context.regs[0] = ERROR;
+        if (proc->pipe_write_buf != NULL) {
+            free(proc->pipe_write_buf);
+            proc->pipe_write_buf = NULL;
+        }
+        ReadyProcess(proc);
+    }
+}
+
+static int KernelReclaim(int id)
+{
+    pipe_state_t *pipe = pipes;
+    lock_state_t *lock = locks;
+    cvar_state_t *cvar = cvars;
+
+    while (pipe != NULL) {
+        if (pipe->valid && pipe->id == id) {
+            pipe->valid = 0;
+            WakeQueueWithError(&pipe->readers);
+            WakeQueueWithError(&pipe->writers);
+            return SUCCESS;
+        }
+        pipe = pipe->next;
+    }
+
+    while (lock != NULL) {
+        if (lock->valid && lock->id == id) {
+            lock->valid = 0;
+            lock->owner = NULL;
+            WakeQueueWithError(&lock->waiters);
+            return SUCCESS;
+        }
+        lock = lock->next;
+    }
+
+    while (cvar != NULL) {
+        if (cvar->valid && cvar->id == id) {
+            cvar->valid = 0;
+            WakeQueueWithError(&cvar->waiters);
+            return SUCCESS;
+        }
+        cvar = cvar->next;
+    }
+
+    return ERROR;
+}
+
+static void CleanupProcessResources(pcb_t *proc)
+{
+    lock_state_t *lock = locks;
+
+    while (lock != NULL) {
+        if (lock->valid) {
+            RemoveProcessFromQueue(&lock->waiters, proc);
+            if (lock->owner == proc) {
+                lock->owner = NULL;
+                WakeLockWaiter(lock);
+            }
+        }
+        lock = lock->next;
+    }
+
+    for (pipe_state_t *pipe = pipes; pipe != NULL; pipe = pipe->next) {
+        RemoveProcessFromQueue(&pipe->readers, proc);
+        RemoveProcessFromQueue(&pipe->writers, proc);
+    }
+
+    for (cvar_state_t *cvar = cvars; cvar != NULL; cvar = cvar->next) {
+        RemoveProcessFromQueue(&cvar->waiters, proc);
+    }
+}
+
 
 /*----------------------------------------------------------------------------------*/
 //CHECKPOINT 4: Fork, Exec, Wait
@@ -189,6 +771,7 @@ void KernelExitProcess(int status)
     TracePrintf(1, "KernelExit: PID %d status %d\n",
                 current_process->pid, status);
 
+    CleanupProcessResources(current_process);
     OrphanChildren(current_process);
     RemoveProcessFromQueue(&ready_queue, current_process);
     current_process->exit_status = status;
@@ -230,7 +813,7 @@ static int KernelFork(void)
     }
 
     //debug: check child's PC after KCCopy and PCB addresses.
-    TracePrintf(0, "KernelFork: parent PCB=%p, child PCB=%p, parent user_context=%p, child user_context=%p\n",
+    TracePrintf(1, "KernelFork: parent PCB=%p, child PCB=%p, parent user_context=%p, child user_context=%p\n",
                 current_process, child, &current_process->user_context, &child->user_context);
     TracePrintf(1, "KernelFork: after KCCopy, child PC=%p\n", child->user_context.pc);
 
@@ -314,6 +897,10 @@ static int KernelWait(int *status_ptr)
     int child_pid;
 
     if (current_process == NULL) {
+        return ERROR;
+    }
+
+    if (status_ptr != NULL && !UserWritable(status_ptr, sizeof(int))) {
         return ERROR;
     }
 
@@ -414,6 +1001,58 @@ int DispatchSyscall(UserContext *uctxt, int current_tick)
                                          (void *)uctxt->regs[1],
                                          (int)uctxt->regs[2],
                                          &blocked);
+        break;
+
+    case YALNIX_PIPE_INIT:
+        uctxt->regs[0] = KernelPipeInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_PIPE_READ:
+        uctxt->regs[0] = KernelPipeRead((int)uctxt->regs[0],
+                                         (void *)uctxt->regs[1],
+                                         (int)uctxt->regs[2],
+                                         &blocked);
+        break;
+
+    case YALNIX_PIPE_WRITE:
+        uctxt->regs[0] = KernelPipeWrite((int)uctxt->regs[0],
+                                          (void *)uctxt->regs[1],
+                                          (int)uctxt->regs[2],
+                                          &blocked);
+        break;
+
+    case YALNIX_LOCK_INIT:
+        uctxt->regs[0] = KernelLockInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_LOCK_ACQUIRE:
+        uctxt->regs[0] = KernelAcquire((int)uctxt->regs[0], &blocked);
+        break;
+
+    case YALNIX_LOCK_RELEASE:
+        uctxt->regs[0] = KernelRelease((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_INIT:
+        uctxt->regs[0] = KernelCvarInit((int *)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_WAIT:
+        uctxt->regs[0] = KernelCvarWait((int)uctxt->regs[0],
+                                         (int)uctxt->regs[1],
+                                         &blocked);
+        break;
+
+    case YALNIX_CVAR_SIGNAL:
+        uctxt->regs[0] = KernelCvarSignal((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_CVAR_BROADCAST:
+        uctxt->regs[0] = KernelCvarBroadcast((int)uctxt->regs[0]);
+        break;
+
+    case YALNIX_RECLAIM:
+        uctxt->regs[0] = KernelReclaim((int)uctxt->regs[0]);
         break;
 
     default:

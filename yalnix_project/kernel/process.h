@@ -80,6 +80,23 @@ typedef struct pcb {
     int tty_read_id;
     void *tty_read_buf;
     int tty_read_len;
+
+    //nonzero if blocked on a pipe read/write.
+    int pipe_read_blocked;
+    int pipe_write_blocked;
+    int pipe_id;
+    void *pipe_read_buf;
+    int pipe_read_len;
+    char *pipe_write_buf;
+    int pipe_write_len;
+    int pipe_write_offset;
+
+    //nonzero if blocked on a lock or condition variable.
+    int lock_blocked;
+    int cvar_blocked;
+    int waiting_lock_id;
+    int waiting_cvar_id;
+    int cvar_wait_lock_id;
 } pcb_t;
 
 //the process currently running or about to return to user mode.

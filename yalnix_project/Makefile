@@ -19,7 +19,7 @@ K_INCS = memory.h process.h syscalls.h trap.h tty.h
 U_SRC_DIR = .
 
 # What are the user c and include files?
-U_SRCS = init.c test/cp3_getpid.c test/cp3_delay.c test/cp3_brk.c test/cp4_fork.c test/cp4_exec.c test/cp4_wait.c test/cp4_fork_multi.c test/cp4_fork_exec.c test/cp5_tty_write.c test/cp5_tty_read.c
+U_SRCS = init.c test/cp3_getpid.c test/cp3_delay.c test/cp3_brk.c test/cp4_fork.c test/cp4_exec.c test/cp4_wait.c test/cp4_fork_multi.c test/cp4_fork_exec.c test/cp5_tty_write.c test/cp5_tty_read.c test/lock.c test/cvar.c test/pipe_r2w.c test/pipe_w2r.c test/bigstack.c test/forkstack.c test/fork.c test/torture.c
 U_INCS =  
 
 

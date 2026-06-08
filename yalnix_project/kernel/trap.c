@@ -4,6 +4,7 @@
 #include "syscalls.h"
 #include "queue.h"
 #include "tty.h"
+#include "memory.h"
 #include <hardware.h>
 #include <ykernel.h>
 #include <ylib.h>
@@ -50,6 +51,8 @@ static int IsRunnable(pcb_t *proc)
 
     return !proc->delayed && !proc->wait_blocked &&
            !proc->tty_read_blocked && !proc->tty_write_blocked &&
+           !proc->pipe_read_blocked && !proc->pipe_write_blocked &&
+           !proc->lock_blocked && !proc->cvar_blocked &&
            !proc->is_zombie;
 }
 
@@ -160,7 +163,7 @@ void HandleTrapKernel(UserContext *uctxt)
 {
     int blocked;
 
-    TracePrintf(0, "kernel trap syscall code=0x%x\n", uctxt->code);
+    TracePrintf(1, "kernel trap syscall code=0x%x\n", uctxt->code);
 
     if (current_process == NULL) {
         uctxt->regs[0] = ERROR;
@@ -272,6 +275,38 @@ void HandleTrapIllegal(UserContext *uctxt)
 
 void HandleTrapMemory(UserContext *uctxt)
 {
+  unsigned int addr;
+  int fault_page;
+  int pfn;
+
+  if (current_process != NULL && current_process->region1_pt != NULL) {
+    addr = (unsigned int)uctxt->addr;
+    if (addr >= VMEM_1_BASE && addr < VMEM_1_LIMIT) {
+      fault_page = (addr - VMEM_1_BASE) >> PAGESHIFT;
+      if (fault_page < current_process->stack_base_page &&
+          fault_page > current_process->brk_page) {
+        for (int vpn = current_process->stack_base_page - 1;
+             vpn >= fault_page; vpn--) {
+          pfn = AllocFrame();
+          if (pfn == ERROR ||
+              MapPage(current_process->region1_pt, vpn, pfn,
+                      PROT_READ | PROT_WRITE) == ERROR) {
+            if (pfn != ERROR) {
+              FreeFrame(pfn);
+            }
+            KernelExitProcess(ERROR);
+            SwitchAwayFromCurrent(uctxt, "HandleTrapMemory: stack grow failed");
+            ReapDetachedZombies();
+            return;
+          }
+        }
+        current_process->stack_base_page = fault_page;
+        WriteRegister(REG_TLB_FLUSH, TLB_FLUSH_1);
+        return;
+      }
+    }
+  }
+
   TracePrintf(0, "aborting PID %d after memory trap addr=0x%x\n",
               current_process == NULL ? -1 : current_process->pid,
               uctxt->addr);

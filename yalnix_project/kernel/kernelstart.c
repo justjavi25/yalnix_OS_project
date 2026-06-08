@@ -18,7 +18,7 @@
 //transition to user mode
 void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
 {
-    TracePrintf(0, "KernelStart: booting\n");
+    TracePrintf(1, "KernelStart: booting\n");
 
     //initialize the physical frame bitmap using the memory size provided by the hardware.
     InitPhysicalMemory(pmem_size);
@@ -94,5 +94,5 @@ void KernelStart(char *cmd_args[], unsigned int pmem_size, UserContext *uctxt)
     //copy the selected user context into the hardware-provided slot.
     memcpy(uctxt, &current_process->user_context, sizeof(UserContext));
 
-    TracePrintf(0, "KernelStart: leaving KernelStart\n");
+    TracePrintf(1, "KernelStart: leaving KernelStart\n");
 }

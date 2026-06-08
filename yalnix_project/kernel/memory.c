@@ -3,6 +3,7 @@
 #include <ykernel.h>
 #include <ylib.h>
 #include "memory.h"
+#include "process.h"
 
 //maximum number of physical frames the Yalnix hardware can provide.
 #define MAX_PHYSICAL_FRAMES (MAX_PMEM_SIZE / PAGESIZE)
@@ -310,6 +311,43 @@ int SetKernelBrk(void *addr)
 pte_t *GetRegion0PageTable(void)
 {
     return region0_page_table;
+}
+
+int UserBufferValidFor(pcb_t *proc, void *buf, int len, int prot)
+{
+    unsigned int start;
+    unsigned int end;
+    int first_page;
+    int last_page;
+
+    if (len < 0 || (len > 0 && buf == NULL)) {
+        return 0;
+    }
+
+    if (len == 0) {
+        return 1;
+    }
+
+    if (proc == NULL || proc->region1_pt == NULL) {
+        return 0;
+    }
+
+    start = (unsigned int)buf;
+    end = start + len - 1;
+    if (end < start || start < VMEM_1_BASE || end >= VMEM_1_LIMIT) {
+        return 0;
+    }
+
+    first_page = (start - VMEM_1_BASE) >> PAGESHIFT;
+    last_page = (end - VMEM_1_BASE) >> PAGESHIFT;
+    for (int vpn = first_page; vpn <= last_page; vpn++) {
+        if (!proc->region1_pt[vpn].valid ||
+            ((proc->region1_pt[vpn].prot & prot) != prot)) {
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 void SyncKernelBrkBeforeVM(pte_t *region0_pt)

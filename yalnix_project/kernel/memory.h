@@ -3,6 +3,8 @@
 
 #include <hardware.h>
 
+typedef struct pcb pcb_t;
+
 //tracks whether virtual memory has been enabled yet.
 extern int vm_enabled;
 
@@ -29,5 +31,8 @@ void SyncKernelBrkBeforeVM(pte_t *region0_pt);
 
 //returns a pointer to the Region 0 page table (needed by KCCopy).
 pte_t *GetRegion0PageTable(void);
+
+//validates that a user buffer belongs to proc and has all requested protections.
+int UserBufferValidFor(pcb_t *proc, void *buf, int len, int prot);
 
 #endif

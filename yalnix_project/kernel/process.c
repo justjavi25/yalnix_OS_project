@@ -626,12 +626,12 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
     int scratch_vpn2 = (KERNEL_STACK_BASE >> PAGESHIFT) - 2;
     pte_t *r0_pt = GetRegion0PageTable();
 
-    TracePrintf(0, "CloneProcess: START cloning parent PID %d at %p\n", parent_proc->pid, parent_proc);
+    TracePrintf(1, "CloneProcess: START cloning parent PID %d at %p\n", parent_proc->pid, parent_proc);
 
     //allocate memory for the new child PCB.
     pcb_t *child = malloc(sizeof(pcb_t));
 
-    TracePrintf(0, "CloneProcess: malloc returned %p\n", child);
+    TracePrintf(1, "CloneProcess: malloc returned %p\n", child);
 
     if (child == NULL) {
         //not enough memory to create child process.
@@ -683,7 +683,7 @@ pcb_t *CloneProcess(pcb_t *parent_proc)
     memcpy(&child->user_context, &parent_proc->user_context, sizeof(UserContext));
 
     //debug: verify the child's user context was copied correctly.
-    TracePrintf(0, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
+    TracePrintf(1, "CloneProcess: cloned parent PC=%p to child PC=%p\n",
                 parent_proc->user_context.pc, child->user_context.pc);
 
     //copy each valid Region 1 page into a private child frame.
@@ -765,6 +765,11 @@ void FreeProcess(pcb_t *proc)
     if (proc->tty_write_buf != NULL) {
         free(proc->tty_write_buf);
         proc->tty_write_buf = NULL;
+    }
+
+    if (proc->pipe_write_buf != NULL) {
+        free(proc->pipe_write_buf);
+        proc->pipe_write_buf = NULL;
     }
 
     //free the kernel stack frames.
