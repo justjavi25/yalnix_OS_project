@@ -482,6 +482,11 @@ static int KernelPipeInit(int *pipe_idp)
         return ERROR;
     }
 
+    // validate pointer is in user space
+    if (AddrToRegion1Page(pipe_idp) == ERROR) {
+        return ERROR;
+    }
+
     // allocate pipe
     int pipe_id = AllocPipe();
     if (pipe_id == ERROR) {
@@ -663,48 +668,68 @@ static int KernelPipeWrite(int pipe_id, void *buf, int len, int *blocked)
     return to_write;
 }
 
-// syscall: destroy pipe and wake all blocked processes
+// forward declarations (defined later in this file)
+static lock_t *FindLock(int lock_id);
+static cvar_t *FindCvar(int cvar_id);
+
+// syscall: destroy pipe/lock/cvar and wake all blocked processes
 static int KernelReclaim(int id)
 {
-    // find pipe
-    pipe_t *pipe = FindPipe(id);
-    if (pipe == NULL) {
-        return ERROR;
-    }
-
-    // wake all blocked readers with error
     pcb_t *proc;
-    while ((proc = DequeueProcess(&pipe->read_queue)) != NULL) {
-        proc->pipe_read_blocked = 0;
-        proc->user_context.regs[0] = ERROR;
-        EnqueueProcess(&ready_queue, proc);
+
+    // try pipe
+    pipe_t *pipe = FindPipe(id);
+    if (pipe != NULL) {
+        // wake all blocked readers with error
+        while ((proc = DequeueProcess(&pipe->read_queue)) != NULL) {
+            proc->pipe_read_blocked = 0;
+            proc->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, proc);
+        }
+
+        // wake all blocked writers with error
+        while ((proc = DequeueProcess(&pipe->write_queue)) != NULL) {
+            proc->pipe_write_blocked = 0;
+            proc->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, proc);
+        }
+
+        // mark pipe as invalid
+        pipe->valid = 0;
+        return SUCCESS;
     }
 
-    // wake all blocked writers with error
-    while ((proc = DequeueProcess(&pipe->write_queue)) != NULL) {
-        proc->pipe_write_blocked = 0;
-        proc->user_context.regs[0] = ERROR;
-        EnqueueProcess(&ready_queue, proc);
+    // try lock
+    lock_t *lock = FindLock(id);
+    if (lock != NULL) {
+        // wake all processes waiting to acquire with error
+        while ((proc = DequeueProcess(&lock->wait_queue)) != NULL) {
+            proc->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, proc);
+        }
+
+        // mark lock as invalid
+        lock->valid = 0;
+        return SUCCESS;
     }
 
-    // mark pipe as invalid
-    pipe->valid = 0;
-    return SUCCESS;
+    // try cvar
+    cvar_t *cvar = FindCvar(id);
+    if (cvar != NULL) {
+        // wake all waiters with error
+        while ((proc = DequeueProcess(&cvar->wait_queue)) != NULL) {
+            proc->user_context.regs[0] = ERROR;
+            EnqueueProcess(&ready_queue, proc);
+        }
+
+        // mark cvar as invalid
+        cvar->valid = 0;
+        return SUCCESS;
+    }
+
+    // no matching resource
+    return ERROR;
 }
-
-// lock data structure
-typedef struct {
-    int id;
-    int valid;
-    int owner_pid;
-    int held;
-    process_queue_t wait_queue;
-} lock_t;
-
-// global lock table
-static lock_t locks[MAX_PIPES];
-// next lock id to assign
-static int next_lock_id = 0;
 
 // find lock by id
 static lock_t *FindLock(int lock_id)
@@ -742,6 +767,11 @@ static int KernelLockInit(int *lock_idp)
 {
     // validate args
     if (lock_idp == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // validate pointer is in user space
+    if (AddrToRegion1Page(lock_idp) == ERROR) {
         return ERROR;
     }
 
@@ -821,18 +851,6 @@ static int KernelRelease(int lock_id)
     return SUCCESS;
 }
 
-// condition variable data structure
-typedef struct {
-    int id;
-    int valid;
-    process_queue_t wait_queue;
-} cvar_t;
-
-// global cvar table
-static cvar_t cvars[MAX_PIPES];
-// next cvar id to assign
-static int next_cvar_id = 0;
-
 // find cvar by id
 static cvar_t *FindCvar(int cvar_id)
 {
@@ -867,6 +885,11 @@ static int KernelCvarInit(int *cvar_idp)
 {
     // validate args
     if (cvar_idp == NULL || current_process == NULL) {
+        return ERROR;
+    }
+
+    // validate pointer is in user space
+    if (AddrToRegion1Page(cvar_idp) == ERROR) {
         return ERROR;
     }
 

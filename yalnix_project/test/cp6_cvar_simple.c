@@ -1,101 +1,98 @@
 // cp6_cvar_simple.c - basic cvar test (producer/consumer)
-#include <stdio.h>
-#include <stdlib.h>
-#include <yalnix.h>
+#include <yuser.h>
 
 int main()
 {
     int lock_id;
     int cvar_id;
     int child_pid;
-    int *status_ptr;
-    int shared_data = 0;
+    int status;
 
     // create lock and cvar
     if (LockInit(&lock_id) == ERROR) {
-        printf("FAIL: LockInit\n");
-        return EXIT_FAILURE;
+        TracePrintf(0, "cp6_cvar: FAIL: LockInit\n");
+        Exit(1);
     }
-    printf("LockInit created lock %d\n", lock_id);
+    TracePrintf(0, "cp6_cvar: LockInit created lock %d\n", lock_id);
 
     if (CvarInit(&cvar_id) == ERROR) {
-        printf("FAIL: CvarInit\n");
-        return EXIT_FAILURE;
+        TracePrintf(0, "cp6_cvar: FAIL: CvarInit\n");
+        Exit(1);
     }
-    printf("CvarInit created cvar %d\n", cvar_id);
+    TracePrintf(0, "cp6_cvar: CvarInit created cvar %d\n", cvar_id);
 
     // fork child
     child_pid = Fork();
     if (child_pid == ERROR) {
-        printf("FAIL: Fork\n");
-        return EXIT_FAILURE;
+        TracePrintf(0, "cp6_cvar: FAIL: Fork\n");
+        Exit(1);
     }
 
     if (child_pid == 0) {
         // consumer process
-        printf("Consumer: Trying to acquire lock\n");
+        TracePrintf(0, "cp6_cvar: Consumer trying to acquire lock\n");
         if (Acquire(lock_id) == ERROR) {
-            printf("Consumer: FAIL: Acquire\n");
-            exit(EXIT_FAILURE);
+            TracePrintf(0, "cp6_cvar: Consumer FAIL: Acquire\n");
+            Exit(1);
         }
-        printf("Consumer: Got lock, waiting on cvar\n");
+        TracePrintf(0, "cp6_cvar: Consumer got lock, waiting on cvar\n");
 
         // wait on cvar (will release lock, wait, and re-acquire)
         if (CvarWait(cvar_id, lock_id) == ERROR) {
-            printf("Consumer: FAIL: CvarWait\n");
-            exit(EXIT_FAILURE);
+            TracePrintf(0, "cp6_cvar: Consumer FAIL: CvarWait\n");
+            Exit(1);
         }
-        printf("Consumer: Woken up, have lock back\n");
+        TracePrintf(0, "cp6_cvar: Consumer woken up, have lock back\n");
 
         if (Release(lock_id) == ERROR) {
-            printf("Consumer: FAIL: Release\n");
-            exit(EXIT_FAILURE);
+            TracePrintf(0, "cp6_cvar: Consumer FAIL: Release\n");
+            Exit(1);
         }
-        printf("Consumer: PASS - got signaled correctly\n");
-        exit(EXIT_SUCCESS);
+        TracePrintf(0, "cp6_cvar: Consumer PASS - got signaled correctly\n");
+        Exit(0);
     } else {
         // producer process
         Delay(1);  // Let consumer reach wait
-        printf("Producer: Acquiring lock\n");
+        TracePrintf(0, "cp6_cvar: Producer acquiring lock\n");
         if (Acquire(lock_id) == ERROR) {
-            printf("Producer: FAIL: Acquire\n");
-            return EXIT_FAILURE;
+            TracePrintf(0, "cp6_cvar: Producer FAIL: Acquire\n");
+            Exit(1);
         }
-        printf("Producer: Got lock, signaling cvar\n");
+        TracePrintf(0, "cp6_cvar: Producer got lock, signaling cvar\n");
 
         if (CvarSignal(cvar_id) == ERROR) {
-            printf("Producer: FAIL: CvarSignal\n");
-            return EXIT_FAILURE;
+            TracePrintf(0, "cp6_cvar: Producer FAIL: CvarSignal\n");
+            Exit(1);
         }
-        printf("Producer: Signaled cvar\n");
+        TracePrintf(0, "cp6_cvar: Producer signaled cvar\n");
 
         if (Release(lock_id) == ERROR) {
-            printf("Producer: FAIL: Release\n");
-            return EXIT_FAILURE;
+            TracePrintf(0, "cp6_cvar: Producer FAIL: Release\n");
+            Exit(1);
         }
-        printf("Producer: Released lock\n");
+        TracePrintf(0, "cp6_cvar: Producer released lock\n");
 
         // wait for consumer
-        if (Wait(status_ptr) == ERROR) {
-            printf("Producer: FAIL: Wait\n");
-            return EXIT_FAILURE;
+        if (Wait(&status) == ERROR) {
+            TracePrintf(0, "cp6_cvar: Producer FAIL: Wait\n");
+            Exit(1);
         }
-        printf("Producer: Consumer exited\n");
+        TracePrintf(0, "cp6_cvar: Producer consumer exited\n");
     }
 
     // reclaim resources
     if (Reclaim(lock_id) == ERROR) {
-        printf("FAIL: Reclaim lock\n");
-        return EXIT_FAILURE;
+        TracePrintf(0, "cp6_cvar: FAIL: Reclaim lock\n");
+        Exit(1);
     }
-    printf("Reclaim: lock destroyed\n");
+    TracePrintf(0, "cp6_cvar: Reclaim lock destroyed\n");
 
     if (Reclaim(cvar_id) == ERROR) {
-        printf("FAIL: Reclaim cvar\n");
-        return EXIT_FAILURE;
+        TracePrintf(0, "cp6_cvar: FAIL: Reclaim cvar\n");
+        Exit(1);
     }
-    printf("Reclaim: cvar destroyed\n");
+    TracePrintf(0, "cp6_cvar: Reclaim cvar destroyed\n");
 
-    printf("PASS\n");
-    return EXIT_SUCCESS;
+    TracePrintf(0, "cp6_cvar: PASS\n");
+    Exit(0);
 }

@@ -1,0 +1,1114 @@
+0>Enter 'go' to go:
+0<go
+1>Bouncer here
+1>Hey!  Hey!  You remember that time when...
+0>SonarGal here (my job is to signal Bouncer)
+2>MallocMonster: malloc'ing 0 pages
+3>Hi, I'm the garbage man!
+1>Waiting for ping...0>Signaling Bouncer...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 2 pages
+1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>42!!!
+0>ping!
+3>All I do is spew garbage!  Watch!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 4 pages
+1>You know what would be a really scary Halloween costume?
+0>ping!
+3>.1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...1>A null pointer!  Ha ha ha.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 1 pages
+1>Hey!  Hey!  You remember that time when...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>s1>Waiting for ping...3>e3>j3>g1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 20 pages
+3>f3>b3>h1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>h1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3> 3>a3>d1>42!!!
+3>u3>j3>t1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>w1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+3> 1>Waiting for ping...3>z3>k3>z1>You know what would be a really scary Halloween costume?
+3>.3> 1>A null pointer!  Ha ha ha.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 16 pages
+1>Hey!  Hey!  You remember that time when...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+3>r3>e3>d1>Hehehehehehehehehehe!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>z1>Waiting for ping...3>f3>s3>i1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 19 pages
+3>y3>c3>h1>42!!!
+0>ping!
+3>y1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>f3>u3>?1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>i1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 14 pages
+3>e1>Waiting for ping...3>t3>v3> 1>A null pointer!  Ha ha ha.
+3>j3>n3>i1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>d1>boing!
+0>Signaling Bouncer...3>i1>Waiting for ping...3>d3>o3>s1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>k2>MallocMonster: malloc'ing 6 pages
+3>m3>x3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>g3>c3>k1>Hehehehehehehehehehe!
+3> 3>n3>r1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>q1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+3>t1>Waiting for ping...3>r3>r3>j1>42!!!
+3>c3>z3>.1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 11 pages
+1>A null pointer!  Ha ha ha.
+0>ping!
+3>d1>boing!
+0>Signaling Bouncer...3>h1>Waiting for ping...3>n3>t3> 1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>g3> 3>r1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>p1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>y3>z3>b1>Hi!  I'm that annoying guy that all the other processes hate!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 2 pages
+3>z3>o3>q1>Hehehehehehehehehehe!
+0>ping!
+3>t1>boing!
+0>Signaling Bouncer...3>s1>Waiting for ping...3>?3> 1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 17 pages
+1>Waiting for ping...1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>;2>MallocMonster: malloc'ing 19 pages
+3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 12 pages
+1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>x2>MallocMonster: malloc'ing 10 pages
+3>x3>i3>h1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>d1>Waiting for ping...3>r3>s3>y1>Hehehehehehehehehehe!
+3>c3>m3> 1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>c1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 4 pages
+3>s1>Waiting for ping...3>e3> 3>g1>42!!!
+3>u3>l3>m1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>s1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>f3> 3>c1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>v2>MallocMonster: malloc'ing 18 pages
+3>x3>v3>m1>A null pointer!  Ha ha ha.
+0>ping!
+3>y1>boing!
+0>Signaling Bouncer...3>r1>Waiting for ping...3>e3>w3>.1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3> 1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>c2>MallocMonster: malloc'ing 8 pages
+3>u3>v3>n1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>b1>boing!
+0>Signaling Bouncer...3>q1>Waiting for ping...3>t3>o3>c1>42!!!
+3> 3>s3>r1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>p1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 2 pages
+3>f1>Waiting for ping...3>l3>h3>k1>You know what would be a really scary Halloween costume?
+3>b3>p3> 1>A null pointer!  Ha ha ha.
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>z1>Waiting for ping...3>z3>t3>j1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>d2>MallocMonster: malloc'ing 16 pages
+3>p3>z3>s1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>m1>boing!
+0>Signaling Bouncer...3>l1>Waiting for ping...3>a3> 3>b1>Hi!  I'm that annoying guy that all the other processes hate!
+3>j3>t3>s1>Hehehehehehehehehehe!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 6 pages
+3>w1>Waiting for ping...3>w3>x3>i1>Why did the chicken cross the road?  Ha ha...
+3>;3> 1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 3 pages
+1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+3>i3>k3>d1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>.1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 20 pages
+1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>:1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 0 pages
+1>42!!!
+0>ping!
+3>v1>boing!
+0>Signaling Bouncer...3>a1>Waiting for ping...3>?3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>m2>MallocMonster: malloc'ing 18 pages
+3>y3>g3>x1>A null pointer!  Ha ha ha.
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>y1>Waiting for ping...3>o3>y3>s1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>h3>f3>g1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>m1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 19 pages
+3> 1>Waiting for ping...3>s3>h3>p1>Hi!  I'm that annoying guy that all the other processes hate!
+3>i3>r3>g1>Hehehehehehehehehehe!
+0>ping!
+3>y1>boing!
+0>Signaling Bouncer...3>o1>Waiting for ping...3>b3>f3>g1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 14 pages
+3>o3>d3>g1>42!!!
+0>ping!
+3>q1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3>y3>u3>u1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>w3>l3>p1>You know what would be a really scary Halloween costume?
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>x1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 3 pages
+3> 1>Waiting for ping...3>v3>k3>c1>A null pointer!  Ha ha ha.
+3>m3>e3>p0>Parent woke up; going back to sleep
+1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>t1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3> 3>h3>y1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>v2>MallocMonster: malloc'ing 3 pages
+3>x3>g3>f1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>u1>boing!
+0>Signaling Bouncer...3>f1>Waiting for ping...3>n3>k3>g1>Hehehehehehehehehehe!
+3> 3>m3>q1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>c1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 3 pages
+3>h1>Waiting for ping...3>g3>i3>d1>42!!!
+3>q3>a3>x1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>r1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>;3> 1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 12 pages
+1>A null pointer!  Ha ha ha.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 10 pages
+1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>x1>boing!
+0>Signaling Bouncer...3>l1>Waiting for ping...3>;3> 3>a1>Hehehehehehehehehehe!
+3> 3>y3>k1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>p1>boing!
+0>Signaling Bouncer...3>x1>Waiting for ping...3>n3>v3>z1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>a2>MallocMonster: malloc'ing 13 pages
+3>x3>q3>p1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>j3>g3>n1>You know what would be a really scary Halloween costume?
+3> 3>q3> 1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>e1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+3>s1>Waiting for ping...3>!3> 1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>o2>MallocMonster: malloc'ing 4 pages
+3>s3>a3>x1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>m1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>v3>e3>k1>Hehehehehehehehehehe!
+3> 3>s3>d1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>r1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 5 pages
+3>x1>Waiting for ping...3>m3>g3>x1>42!!!
+3>t3>x3>p1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>e1>Waiting for ping...3>h3>b3>q1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>w2>MallocMonster: malloc'ing 18 pages
+3>n3> 3>g1>A null pointer!  Ha ha ha.
+0>ping!
+3>v1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3>q3>j3>o1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>?3> 1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 13 pages
+1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 17 pages
+1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>w1>boing!
+0>Signaling Bouncer...3>t1>Waiting for ping...3>p3>l3>z1>42!!!
+3>e3> 3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>u1>boing!
+0>Signaling Bouncer...3>m1>Waiting for ping...3>p3>p3>j1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>j2>MallocMonster: malloc'ing 12 pages
+3>z3> 3>s1>A null pointer!  Ha ha ha.
+0>ping!
+3>v1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>l3>n3>f1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>i3> 3>j1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>t1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 18 pages
+3> 1>Waiting for ping...3>y3>l3>b1>Hi!  I'm that annoying guy that all the other processes hate!
+3>;3> 1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 2 pages
+1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 15 pages
+1>A null pointer!  Ha ha ha.
+0>ping!
+3>n1>boing!
+0>Signaling Bouncer...3>a1>Waiting for ping...3>m3>j3>j1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>d3>t3>v1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>j1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>r3>f3>f1>Hi!  I'm that annoying guy that all the other processes hate!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>z2>MallocMonster: malloc'ing 7 pages
+3>q3>c3>r1>Hehehehehehehehehehe!
+0>ping!
+3>d1>boing!
+0>Signaling Bouncer...3>f1>Waiting for ping...3> 3>;3> 1>Why did the chicken cross the road?  Ha ha...
+1>42!!!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>y2>MallocMonster: malloc'ing 13 pages
+3>u3>j3>y1>A null pointer!  Ha ha ha.
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>a1>Waiting for ping...3>k3>f3>?1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3> 1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 1 pages
+1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>42!!!
+3>b3>b3>q1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>o1>boing!
+0>Signaling Bouncer...3>h1>Waiting for ping...3> 3>f3>j1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>p2>MallocMonster: malloc'ing 5 pages
+3>t3>t3>d1>A null pointer!  Ha ha ha.
+0>ping!
+3>w1>boing!
+0>Signaling Bouncer...3>o1>Waiting for ping...3>r3>w3>f1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3> 3> 3>p1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>k1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 15 pages
+3>s1>Waiting for ping...3>r3>o3>e1>Hi!  I'm that annoying guy that all the other processes hate!
+3>x3>l3> 1>Hehehehehehehehehehe!
+0>ping!
+3>w1>boing!
+0>Signaling Bouncer...3>s1>Waiting for ping...3>m3>m3>d1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>h2>MallocMonster: malloc'ing 8 pages
+3>p3>z3>m1>42!!!
+0>ping!
+3>u1>boing!
+0>Signaling Bouncer...3>v1>Waiting for ping...3> 3>n3>a1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>e3>k3>u1>You know what would be a really scary Halloween costume?
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>j1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 15 pages
+3>o1>Waiting for ping...3>?3> 1>A null pointer!  Ha ha ha.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 8 pages
+1>Hey!  Hey!  You remember that time when...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>g2>MallocMonster: malloc'ing 0 pages
+3>w3>r3>b1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>f1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>f3>u3>x1>42!!!
+3>t3>u3>s1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 13 pages
+3>j1>Waiting for ping...3>t3>m3>p1>You know what would be a really scary Halloween costume?
+3>l3>s3>x1>A null pointer!  Ha ha ha.
+0>ping!
+3>f1>boing!
+0>Signaling Bouncer...3>j1>Waiting for ping...3>m3>i3>j1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 9 pages
+3>w3>a3>a1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>q1>boing!
+0>Signaling Bouncer...3>.1>Waiting for ping...3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+1>Waiting for ping...1>Hehehehehehehehehehe!
+3>b3>j3>s1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>v1>boing!
+0>Signaling Bouncer...3>e1>Waiting for ping...3>!3> 1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 17 pages
+1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+0>ping!
+3>x1>boing!
+0>Signaling Bouncer...3>j1>Waiting for ping...3>n3>t3>r1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>k2>MallocMonster: malloc'ing 8 pages
+3>e3>u3>f0>Parent woke up; going back to sleep
+1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>b1>boing!
+0>Signaling Bouncer...3>e1>Waiting for ping...3>q3>?3> 1>Hey!  Hey!  You remember that time when...
+3>n3>y3>t1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>v1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+3>f1>Waiting for ping...3>h3>k3> 1>Hehehehehehehehehehe!
+3>e3>g3>u1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>x1>boing!
+0>Signaling Bouncer...3>c1>Waiting for ping...3> 3>a3>x1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 16 pages
+3>i3>c3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>a1>boing!
+0>Signaling Bouncer...3>b1>Waiting for ping...3>w3>r3>s1>You know what would be a really scary Halloween costume?
+3>z3>h3>!1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 20 pages
+1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 20 pages
+1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+3>w3>u3>f1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>b1>boing!
+0>Signaling Bouncer...3>l1>Waiting for ping...3>w3>a3>c1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>g2>MallocMonster: malloc'ing 18 pages
+3>h3>f3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>e1>boing!
+0>Signaling Bouncer...3>z1>Waiting for ping...3>y3>o3>a1>You know what would be a really scary Halloween costume?
+3>l3>e3>r1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>r1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 4 pages
+3> 1>Waiting for ping...3>h3>c3>i1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>r3>r3>t1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>m1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>;3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 5 pages
+1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+3>k3>u3>b1>42!!!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>v1>Waiting for ping...3>p3>n3>y1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>h2>MallocMonster: malloc'ing 16 pages
+3>;3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 14 pages
+1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>o1>boing!
+0>Signaling Bouncer...3>y1>Waiting for ping...3>i3>w3>l1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>v2>MallocMonster: malloc'ing 6 pages
+3>s3>u3>c1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>?1>Waiting for ping...3> 1>Hehehehehehehehehehe!
+3>?3> 1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 16 pages
+1>Waiting for ping...1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 4 pages
+1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+3>o3>n3> 1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>s1>Waiting for ping...3>q3>j3>j1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>d2>MallocMonster: malloc'ing 3 pages
+3>l3> 3>f1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>o1>boing!
+0>Signaling Bouncer...3>o1>Waiting for ping...3>o3>z3>f1>Hehehehehehehehehehe!
+3>c3>x3>!1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 15 pages
+1>Waiting for ping...1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>?2>MallocMonster: malloc'ing 9 pages
+3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+3>p3>d3>q1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>w1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 0 pages
+3>k1>Waiting for ping...3>c3>p3>q1>Hey!  Hey!  You remember that time when...
+3> 3>h3>a1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>b1>boing!
+0>Signaling Bouncer...3>f1>Waiting for ping...3>b3>o3>w1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>g2>MallocMonster: malloc'ing 0 pages
+3>j3>z3>c1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>r1>Waiting for ping...3>s3>d3>u1>42!!!
+3>d3>?3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 0 pages
+1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3>d1>Waiting for ping...3>l3>b3>o1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 1 pages
+3>v3> 3>v1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>y1>boing!
+0>Signaling Bouncer...3>p1>Waiting for ping...3>s3>?3> 1>Hey!  Hey!  You remember that time when...
+1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 11 pages
+1>Waiting for ping...1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 18 pages
+1>42!!!
+0>ping!
+3>u1>boing!
+0>Signaling Bouncer...3>m1>Waiting for ping...3>u3>k3>a1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>k3>k3>f1>You know what would be a really scary Halloween costume?
+0>ping!
+3>n1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>n3>p3>z1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>o2>MallocMonster: malloc'ing 16 pages
+3>w3> 3>p1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>a1>Waiting for ping...3>k3>y3>z1>Hey!  Hey!  You remember that time when...
+3>c3>j3>t1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>i1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 16 pages
+3>x1>Waiting for ping...3>y3>x3> 1>Hehehehehehehehehehe!
+3>l3>j3>e1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>x1>boing!
+0>Signaling Bouncer...3>d1>Waiting for ping...3>f3>?3> 1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 1 pages
+1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 2 pages
+1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>f1>boing!
+0>Signaling Bouncer...3>y1>Waiting for ping...3>j3> 3>?1>Hey!  Hey!  You remember that time when...
+3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 5 pages
+1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>42!!!
+3>n3> 3>s1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>b1>Waiting for ping...3>f3>c3>l1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 4 pages
+3>u3>n3>w1>A null pointer!  Ha ha ha.
+0>ping!
+3>c1>boing!
+0>Signaling Bouncer...3>q1>Waiting for ping...3> 3>a3>c1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>z3>s3>a1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>d1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 15 pages
+3> 1>Waiting for ping...3>g3>u3>n1>Hi!  I'm that annoying guy that all the other processes hate!
+3>k3>n3>d1>Hehehehehehehehehehe!
+0>ping!
+3>a1>boing!
+0>Signaling Bouncer...3>f1>Waiting for ping...3>a3>.3> 1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 13 pages
+1>42!!!
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3>j1>Waiting for ping...3>l3>h3>e1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>w3>k3>s1>You know what would be a really scary Halloween costume?
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>y3>c3>h1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>y2>MallocMonster: malloc'ing 13 pages
+3>b3>p3>l1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3>p1>Waiting for ping...3> 3>w3>l1>Hey!  Hey!  You remember that time when...
+3>p3>?3> 0>Parent woke up; going back to sleep
+1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 13 pages
+1>Waiting for ping...1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 12 pages
+1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>h1>Waiting for ping...3>l3>g3>j1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>m2>MallocMonster: malloc'ing 0 pages
+3>e3> 3>m1>A null pointer!  Ha ha ha.
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>i1>Waiting for ping...3>t3>g3>a1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>x3>y3>l1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>s1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 9 pages
+3>m1>Waiting for ping...3>c3>.3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+1>Hehehehehehehehehehe!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 19 pages
+1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>g2>MallocMonster: malloc'ing 4 pages
+3>f3>z3>t1>A null pointer!  Ha ha ha.
+0>ping!
+3>f1>boing!
+0>Signaling Bouncer...3>a1>Waiting for ping...3>l3>k3>q1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>f3>b3>z1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 18 pages
+3>s1>Waiting for ping...3>i3>r3>m1>Hi!  I'm that annoying guy that all the other processes hate!
+3>m3>b3> 1>Hehehehehehehehehehe!
+0>ping!
+3>c1>boing!
+0>Signaling Bouncer...3>p1>Waiting for ping...3>m3>u3>y1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>f2>MallocMonster: malloc'ing 15 pages
+3>s3>e3>z1>42!!!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3>k3>s3>n1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>f3>s3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>s1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 9 pages
+3>y1>Waiting for ping...3>j3> 3>c1>A null pointer!  Ha ha ha.
+3>d3>t3>n1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>y1>boing!
+0>Signaling Bouncer...3>z1>Waiting for ping...3>j3>s3>v1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 16 pages
+3> 3>j3>m1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>j1>boing!
+0>Signaling Bouncer...3>x1>Waiting for ping...3>a3>c3>e1>Hehehehehehehehehehe!
+3>z3>o3>?1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+1>Waiting for ping...1>42!!!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>w3>b3>e1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 5 pages
+3>p3>n3>p1>You know what would be a really scary Halloween costume?
+0>ping!
+3>q1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>s3>r3>p1>A null pointer!  Ha ha ha.
+3> 3>t3>f1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>q1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 0 pages
+3>v1>Waiting for ping...3>g3> 3>h1>Hey!  Hey!  You remember that time when...
+3>i3>n3> 1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>q1>boing!
+0>Signaling Bouncer...3>o1>Waiting for ping...3>v3>c3>v1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 2>MallocMonster: malloc'ing 11 pages
+3>;3> 1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>42!!!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>t1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+3>k1>Waiting for ping...3>c3>h3>v1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>x3>c3>d1>You know what would be a really scary Halloween costume?
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>a3>n3>w1>A null pointer!  Ha ha ha.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>i2>MallocMonster: malloc'ing 4 pages
+3>l3>p3>m1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+3>z1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>p3>b3>o1>Hey!  Hey!  You remember that time when...
+3> 3>d3>i1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>l1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 0 pages
+3>s1>Waiting for ping...3>p3>u3> 1>Hehehehehehehehehehe!
+3>b3>j3>m1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3> 1>Waiting for ping...3>r3> 3>u1>42!!!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 4 pages
+3>u3>d3>?1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>j1>Waiting for ping...3>k3>e3>m1>You know what would be a really scary Halloween costume?
+3>t3>d3>o1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>i1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+3>f1>Waiting for ping...3>f3>g3>y1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3> 3> 3>e1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>s1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3>k3>v3>f1>Hi!  I'm that annoying guy that all the other processes hate!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>u2>MallocMonster: malloc'ing 6 pages
+3>s3>d3>p1>Hehehehehehehehehehe!
+0>ping!
+3>w1>boing!
+0>Signaling Bouncer...3>u1>Waiting for ping...3>!3> 1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>t1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 13 pages
+3>l1>Waiting for ping...3> 3>u3>g1>42!!!
+3>f3>w3>k1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>h1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3>l3> 3>p1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>d2>MallocMonster: malloc'ing 1 pages
+3>o3>u3>k1>A null pointer!  Ha ha ha.
+0>ping!
+3>t1>boing!
+0>Signaling Bouncer...3>v1>Waiting for ping...3>o3>m3>h1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>g3>x3> 1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>q1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+3>e1>Waiting for ping...3>b3>n3>w1>Hi!  I'm that annoying guy that all the other processes hate!
+3>w3>i3> 1>Hehehehehehehehehehe!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>:1>Waiting for ping...3> 1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 16 pages
+1>42!!!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>q1>boing!
+0>Signaling Bouncer...3>e1>Waiting for ping...3>a3>m3> 1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 6 pages
+3>b3>v3>u1>A null pointer!  Ha ha ha.
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3>y1>Waiting for ping...3>o3>y3>n1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3>d3>r3>?1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 2 pages
+1>Waiting for ping...1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+2>MallocMonster: malloc'ing 17 pages
+1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>42!!!
+0>ping!
+3>d1>boing!
+0>Signaling Bouncer...3>g1>Waiting for ping...3>g3>j3>g1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>b2>MallocMonster: malloc'ing 9 pages
+3> 3>i3>v1>You know what would be a really scary Halloween costume?
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>b1>Waiting for ping...3>t3>h3> 1>A null pointer!  Ha ha ha.
+3>p3>o3>f1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3> 1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 20 pages
+3>f1>Waiting for ping...3>n3>d3>w1>Hey!  Hey!  You remember that time when...
+3>m3>q3>d1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>y1>Waiting for ping...3>q3>y3>x1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>l2>MallocMonster: malloc'ing 2 pages
+3>g3>u3>j1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3> 1>boing!
+0>Signaling Bouncer...3>v1>Waiting for ping...3>!3> 1>42!!!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 9 pages
+1>Waiting for ping...1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>.2>MallocMonster: malloc'ing 17 pages
+3> 1>A null pointer!  Ha ha ha.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>Parent woke up; going back to sleep
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 10 pages
+1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+3>x3> 3>a1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>o1>boing!
+0>Signaling Bouncer...3>o1>Waiting for ping...3>u3>m3>z1>Hehehehehehehehehehe!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>o2>MallocMonster: malloc'ing 9 pages
+3>f3> 3>y1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+3>t1>boing!
+0>Signaling Bouncer...3>w1>Waiting for ping...3>y3>v3>j1>42!!!
+3>u3>e3>d1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>z1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 18 pages
+3>a1>Waiting for ping...3>u3> 3>n1>You know what would be a really scary Halloween costume?
+3> 3>j3>i1>A null pointer!  Ha ha ha.
+0>ping!
+3>p1>boing!
+0>Signaling Bouncer...3>x1>Waiting for ping...3>m3> 3>t1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>s2>MallocMonster: malloc'ing 18 pages
+3>l3>p3>g1>Hey!  Hey!  You remember that time when...
+0>ping!
+3>h1>boing!
+0>Signaling Bouncer...3>q1>Waiting for ping...3>z3>j3>i1>Hi!  I'm that annoying guy that all the other processes hate!
+3> 3>.3> 1>Hehehehehehehehehehe!
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 4 pages
+1>Waiting for ping...1>Why did the chicken cross the road?  Ha ha...
+3>x3>l3>j1>42!!!
+0>ping!
+3>s1>boing!
+0>Signaling Bouncer...3>d1>Waiting for ping...3>r3> 3>z1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>h2>MallocMonster: malloc'ing 8 pages
+3>h3>:3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>A null pointer!  Ha ha ha.
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 11 pages
+1>Waiting for ping...1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+0>ping!
+1>boing!
+0>Signaling Bouncer...1>Waiting for ping...1>Hey!  Hey!  You remember that time when...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>x2>MallocMonster: malloc'ing 17 pages
+3>s3>k3>w1>Hi!  I'm that annoying guy that all the other processes hate!
+0>ping!
+3>s1>boing!
+0>Signaling Bouncer...3>l1>Waiting for ping...3>c3>a3>w1>Hehehehehehehehehehe!
+3> 3>t3>h1>Why did the chicken cross the road?  Ha ha...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>d1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 8 pages
+3>a1>Waiting for ping...3>w3>l3>t1>42!!!
+3>b3>g3> 1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+0>ping!
+3>i1>boing!
+0>Signaling Bouncer...3>d1>Waiting for ping...3>f3>p3>f1>You know what would be a really scary Halloween costume?
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>w2>MallocMonster: malloc'ing 17 pages
+3>l3> 3>u1>A null pointer!  Ha ha ha.
+0>ping!
+3>n1>boing!
+0>Signaling Bouncer...3>f1>Waiting for ping...3>c3>b3>j1>My while loop is over, so I'm goint to repeat all my lame jokes now.
+3> 3>f3>y1>Hey!  Hey!  You remember that time when...
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>a1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 17 pages
+3>l1>Waiting for ping...3>d3>e3>l1>Hi!  I'm that annoying guy that all the other processes hate!
+3>q3>o3>t1>Hehehehehehehehehehe!
+0>ping!
+3>k1>boing!
+0>Signaling Bouncer...3>n1>Waiting for ping...3> 3>a3>o1>Why did the chicken cross the road?  Ha ha...
+2>MallocMonster: freeing the stuff I just malloc'ed
+3>m2>MallocMonster: malloc'ing 14 pages
+3>d3>p3>b1>42!!!
+0>ping!
+3>g1>boing!
+0>Signaling Bouncer...3>l1>Waiting for ping...3>n3>w3>c1>Get it?  42?  Get it?  Huh?  Hey, you're not listening...
+3>v3>:3> 1>You know what would be a really scary Halloween costume?
+0>ping!
+2>MallocMonster: freeing the stuff I just malloc'ed
+1>boing!
+0>Signaling Bouncer...2>MallocMonster: malloc'ing 14 pages
+1>Waiting for ping...1>A null pointer!  Ha ha ha.
